@@ -14,8 +14,9 @@ public class ItemRepositoryImpl implements ItemRepository {
     Long idCounter = 1L;
 
     @Override
-    public Item create(Item item) {
+    public Item create(Long owner, Item item) {
         item.setId(idCounter++);
+        item.setOwner(owner);
         items.add(item);
         return item;
     }

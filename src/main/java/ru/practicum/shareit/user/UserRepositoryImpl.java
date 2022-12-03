@@ -3,7 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.ObjectNotFoundException;
+import ru.practicum.shareit.ObjectNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,26 +24,22 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User update(Long userId, User user) {
-        System.out.println(2);
         User updatedUser = users.stream().filter(u -> u.getId().equals(userId)).findFirst()
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with %d id not found", userId)));
-        System.out.println(3);
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id=%d not found", userId)));
         if (user.getEmail() != null) {
             checkEmailUniqueness(user);
             updatedUser.setEmail(user.getEmail());
         }
-        System.out.println(4);
         if (user.getName() != null) {
             updatedUser.setName(user.getName());
         }
-        System.out.println(5);
         return updatedUser;
     }
 
     @Override
     public User getById(Long userId) {
         return users.stream().filter(user -> user.getId().equals(userId)).findFirst()
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with %d id not found", userId)));
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id=%d not found", userId)));
     }
 
     @Override
