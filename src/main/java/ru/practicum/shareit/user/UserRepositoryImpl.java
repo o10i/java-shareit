@@ -1,5 +1,7 @@
 package ru.practicum.shareit.user;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
 
@@ -7,9 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserRepositoryImpl implements UserRepository {
-    private final List<User> users = new ArrayList<>();
-    private Long idCounter = 1L;
+    final List<User> users = new ArrayList<>();
+    Long idCounter = 1L;
 
     @Override
     public User create(User user) {
