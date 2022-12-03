@@ -1,7 +1,13 @@
 package ru.practicum.shareit.booking;
 
-/**
- * TODO Sprint add-bookings.
- */
+import lombok.Data;
+
+@Data
 public class Booking {
+    Long id;
+    String start;
+    String end;
+    Long item;
+    Long booker;
+    Status status;
 }
