@@ -13,16 +13,16 @@ public class ItemController {
     private final ItemService service;
 
     @PostMapping()
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long owner,
+    public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @Valid @RequestBody ItemDto itemDto) {
-        return service.create(owner, itemDto);
+        return service.create(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long owner,
+    public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @PathVariable Long itemId,
                           @RequestBody ItemDto itemDto) {
-        return service.update(owner, itemId, itemDto);
+        return service.update(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
@@ -31,12 +31,17 @@ public class ItemController {
     }
 
     @GetMapping()
-    public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long owner) {
-        return service.getAll(owner);
+    public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return service.getAll(userId);
     }
     
     @DeleteMapping("{itemId}")
     public void deleteById(@PathVariable Long itemId) {
         service.deleteById(itemId);
+    }
+
+    @GetMapping("/search")
+    public List<ItemDto> search(@RequestParam String text) {
+        return service.search(text);
     }
 }

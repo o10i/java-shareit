@@ -16,9 +16,9 @@ public class ItemRepositoryImpl implements ItemRepository {
     Long idCounter = 1L;
 
     @Override
-    public Item create(Long owner, Item item) {
+    public Item create(Long userId, Item item) {
         item.setId(idCounter++);
-        item.setOwner(owner);
+        item.setOwner(userId);
         items.add(item);
         return item;
     }
@@ -45,12 +45,20 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public List<Item> getAll(Long owner) {
-        return items.stream().filter(item -> item.getOwner().equals(owner)).collect(Collectors.toList());
+    public List<Item> getAll(Long userId) {
+        return items.stream().filter(item -> item.getOwner().equals(userId)).collect(Collectors.toList());
     }
 
     @Override
     public void deleteById(Long itemId) {
         items.remove(getById(itemId));
+    }
+
+    @Override
+    public List<Item> search(String text) {
+        String lowerCaseText = text.toLowerCase();
+        return items.stream()
+                .filter(item -> item.getAvailable() && (item.getName().toLowerCase().contains(lowerCaseText) ||
+                item.getDescription().toLowerCase().contains(lowerCaseText))).collect(Collectors.toList());
     }
 }
