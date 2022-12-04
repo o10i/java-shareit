@@ -7,7 +7,7 @@ public interface UserRepository {
 
     User update(Long userId, User user);
 
-    User getById(Long id);
+    User getById(Long userId);
 
     List<User> getAll();
 

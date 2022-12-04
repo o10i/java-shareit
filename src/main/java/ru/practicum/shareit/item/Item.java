@@ -16,7 +16,7 @@ public class Item {
     @NotBlank
     String description;
     @NotNull
-    boolean available;
+    Boolean available;
     Long owner;
     ItemRequest request;
 }
