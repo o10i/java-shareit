@@ -1,9 +1,10 @@
 package ru.practicum.shareit.user;
 
-class UserMapper {
-    private UserMapper() {
-    }
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+class UserMapper {
     public static UserDto toUserDto(User user) {
         return UserDto.builder()
                 .id(user.getId())

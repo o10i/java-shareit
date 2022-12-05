@@ -7,7 +7,7 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
-@FieldDefaults(level= AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemRequest {
     Long id;
     String description;

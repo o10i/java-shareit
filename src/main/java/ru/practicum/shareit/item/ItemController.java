@@ -34,7 +34,7 @@ public class ItemController {
     public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return service.getAll(userId);
     }
-    
+
     @DeleteMapping("{itemId}")
     public void deleteById(@PathVariable Long itemId) {
         service.deleteById(itemId);
