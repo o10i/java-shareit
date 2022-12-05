@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.booking;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,9 +8,11 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemRequest {
+public class BookingDto {
     Long id;
-    String description;
-    Long requestor;
-    String created;
+    String start;
+    String end;
+    Long item;
+    Long booker;
+    Status status;
 }

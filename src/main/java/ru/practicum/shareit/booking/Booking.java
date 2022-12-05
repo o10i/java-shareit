@@ -1,7 +1,18 @@
 package ru.practicum.shareit.booking;
 
-/**
- * TODO Sprint add-bookings.
- */
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Booking {
+    Long id;
+    String start;
+    String end;
+    Long item;
+    Long booker;
+    Status status;
 }
