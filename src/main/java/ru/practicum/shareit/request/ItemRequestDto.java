@@ -1,7 +1,16 @@
 package ru.practicum.shareit.request;
 
-/**
- * TODO Sprint add-item-requests.
- */
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@Builder
+@FieldDefaults(level= AccessLevel.PRIVATE)
 public class ItemRequestDto {
+    Long id;
+    String description;
+    Long requestor;
+    String created;
 }

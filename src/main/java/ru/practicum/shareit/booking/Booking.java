@@ -1,8 +1,11 @@
 package ru.practicum.shareit.booking;
 
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
+@Builder
+@FieldDefaults(level= AccessLevel.PRIVATE)
 public class Booking {
     Long id;
     String start;
