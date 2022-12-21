@@ -1,16 +1,15 @@
 package ru.practicum.shareit.request;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemRequest {
+public class RequestDto {
     Long id;
     String description;
     Long requestor;
-    String created;
+    //String created;
 }

@@ -1,16 +1,22 @@
 package ru.practicum.shareit.request;
 
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "requests")
 @Data
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemRequestDto {
+public class Request {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    @Column
     String description;
+    @Column(name = "requestor_id")
     Long requestor;
-    String created;
+    //String created;
 }
