@@ -5,21 +5,27 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemRepositoryImpl implements ItemRepository {
-    final List<Item> items = new ArrayList<>();
+    final Map<Long, Item> items = new HashMap<>();
+    final Map<Long, List<Item>> usersItems = new LinkedHashMap<>();
     Long idCounter = 1L;
 
     @Override
     public Item create(Long userId, Item item) {
         item.setId(idCounter++);
         item.setOwner(userId);
-        items.add(item);
+
+        items.put(item.getId(), item);
+
+        List<Item> userItems = usersItems.computeIfAbsent(userId, aLong -> new ArrayList<>());
+        userItems.add(item);
+        usersItems.put(userId, userItems);
+
         return item;
     }
 
@@ -40,24 +46,24 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Item getById(Long itemId) {
-        return items.stream().filter(item -> item.getId().equals(itemId)).findFirst()
+        return Optional.ofNullable(items.get(itemId))
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Item with id=%d not found", itemId)));
     }
 
     @Override
     public List<Item> getAll(Long userId) {
-        return items.stream().filter(item -> item.getOwner().equals(userId)).collect(Collectors.toList());
+        return usersItems.get(userId);
     }
 
     @Override
     public void deleteById(Long itemId) {
-        items.remove(getById(itemId));
+        items.remove(itemId);
     }
 
     @Override
     public List<Item> search(String text) {
         String lowerCaseText = text.toLowerCase();
-        return items.stream()
+        return items.values().stream()
                 .filter(item -> item.getAvailable() && (item.getName().toLowerCase().contains(lowerCaseText) ||
                 item.getDescription().toLowerCase().contains(lowerCaseText))).collect(Collectors.toList());
     }
