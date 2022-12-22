@@ -1,3 +1,4 @@
+/*
 package ru.practicum.shareit.item;
 
 import lombok.AccessLevel;
@@ -68,3 +69,4 @@ public class ItemRepositoryImpl implements ItemRepository {
                 item.getDescription().toLowerCase().contains(lowerCaseText))).collect(Collectors.toList());
     }
 }
+*/

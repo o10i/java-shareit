@@ -10,12 +10,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
-    private final ItemService service;
+    private final ItemServiceImpl service;
 
     @PostMapping()
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @Valid @RequestBody ItemDto itemDto) {
-        return service.create(userId, itemDto);
+    public ItemDto save(@RequestHeader("X-Sharer-User-Id") Long userId,
+                        @Valid @RequestBody ItemDto itemDto) {
+        return service.save(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
@@ -26,13 +26,13 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@PathVariable Long itemId) {
-        return service.getById(itemId);
+    public ItemDto findById(@PathVariable Long itemId) {
+        return service.findById(itemId);
     }
 
     @GetMapping()
-    public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return service.getAll(userId);
+    public List<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return service.findAll(userId);
     }
 
     @DeleteMapping("{itemId}")

@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users
     name  VARCHAR(255)                            NOT NULL,
     email VARCHAR(512)                            NOT NULL,
     CONSTRAINT pk_user PRIMARY KEY (id),
-    CONSTRAINT UQ_USER_EMAIL UNIQUE (email)
+    CONSTRAINT uq_user_email UNIQUE (email)
 );
 
 CREATE TABLE IF NOT EXISTS requests
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS items
     description  VARCHAR(255)                            NOT NULL,
     is_available BOOL                                    NOT NULL,
     owner_id     BIGINT                                  NOT NULL,
-    request_id   BIGINT                                  NOT NULL,
+    request_id   BIGINT,
     CONSTRAINT pk_item PRIMARY KEY (id),
     CONSTRAINT fk_owner_to_users FOREIGN KEY (owner_id) REFERENCES users (id),
     CONSTRAINT fk_request_to_requests FOREIGN KEY (request_id) REFERENCES requests (id)
