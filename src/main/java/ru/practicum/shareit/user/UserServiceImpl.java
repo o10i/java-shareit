@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,8 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> findAll() {
-        List<User> users = repository.findAll();
-        return users.stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        return UserMapper.toUsersDto(repository.findAll());
     }
 
     @Override
