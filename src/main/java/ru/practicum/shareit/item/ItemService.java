@@ -14,5 +14,4 @@ interface ItemService {
     void deleteById(Long itemId);
 
     List<ItemDto> search(String text);
-
 }

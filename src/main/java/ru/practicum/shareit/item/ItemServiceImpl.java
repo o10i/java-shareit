@@ -73,11 +73,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(String text) {
-        String lowerText = text.toLowerCase();
-        if (!lowerText.equals("")) {
-            return repository.findAll().stream()
-                    .filter(item -> item.getAvailable() && (item.getName().toLowerCase().contains(lowerText) ||
-                            item.getDescription().toLowerCase().contains(lowerText))).map(ItemMapper::toItemDto).collect(Collectors.toList());
+        if (!text.equals("")) {
+            return repository.search(text);
         }
         return new ArrayList<>();
     }
