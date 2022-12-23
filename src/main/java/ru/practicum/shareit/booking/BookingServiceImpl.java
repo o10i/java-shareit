@@ -4,11 +4,19 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.ObjectUnavailableException;
+import ru.practicum.shareit.exception.ObjectIllegalArgumentException;
+import ru.practicum.shareit.exception.ObjectNotEqualException;
+import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.item.ItemDto;
 import ru.practicum.shareit.item.ItemServiceImpl;
 import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.UserServiceImpl;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,25 +25,109 @@ public class BookingServiceImpl implements BookingService {
     BookingRepository repository;
     ItemServiceImpl itemService;
     UserServiceImpl userService;
+
     @Override
-    public BookingDto save(Long userId, BookingDto bookingDto) {
-        Long itemId = bookingDto.getItemId();
+    public BookingOutDto save(Long userId, BookingInDto bookingInDto) {
+        Long itemId = bookingInDto.getItemId();
         ItemDto item = itemService.findById(itemId);
 
         if (!item.getAvailable()) {
-            throw new ObjectUnavailableException(String.format("Item with id=%d unavailable.", itemId));
+            throw new ObjectIllegalArgumentException(String.format("Item with id=%d unavailable.", itemId));
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = bookingInDto.getStart();
+        LocalDateTime end = bookingInDto.getEnd();
+        if (start.isBefore(now) || end.isBefore(now) || end.isBefore(start)) {
+            throw new ObjectIllegalArgumentException(String.format("start=%s or end=%s has invalid value.", start, end));
         }
 
         UserDto booker = userService.findById(userId);
 
-        Booking booking = BookingMapper.toBooking(bookingDto);
+        Booking booking = BookingMapper.toBooking(bookingInDto);
         booking.setBookerId(userId);
         booking.setStatus(Status.WAITING);
         repository.save(booking);
+        return BookingMapper.toBookingOutDto(booking, booker, item);
+    }
 
-        BookingDto savedBookingDto = BookingMapper.toBookingDto(booking);
-        savedBookingDto.setBooker(booker);
-        savedBookingDto.setItem(item);
-        return savedBookingDto;
+    @Override
+    public BookingOutDto approve(Long userId, Long bookingId, Boolean approved) {
+        Booking booking = repository.findById(bookingId)
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Booking with id=%d not found", bookingId)));
+        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
+        repository.save(booking);
+        return BookingMapper.toBookingOutDto(booking,
+                userService.findById(booking.getBookerId()),
+                itemService.findById(booking.getItemId()));
+    }
+
+    @Override
+    public BookingOutDto findById(Long userId, Long bookingId) {
+        userService.findById(userId);
+        Booking booking = repository.findById(bookingId)
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Booking with id=%d not found", bookingId)));
+
+        Long bookerId = booking.getBookerId();
+        Long ownerId = itemService.findItemOwnerIdById(booking.getItemId());
+        if (!userId.equals(bookerId) && !userId.equals(ownerId)) {
+            throw new ObjectNotEqualException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
+        }
+
+        return BookingMapper.toBookingOutDto(booking,
+                userService.findById(bookerId),
+                itemService.findById(booking.getItemId()));
+    }
+
+    @Override
+    public List<BookingOutDto> findAll(Long userId, String state) {
+        userService.findById(userId);
+
+        State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
+                .orElseThrow(() -> new ObjectIllegalArgumentException("Unknown state: UNSUPPORTED_STATUS"));
+
+        switch (st) {
+            case ALL:
+                return toBookingsOutDto(repository.findAllByBookerIdOrderByStartDesc(userId));
+            case CURRENT:
+                return toBookingsOutDto(repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+            case PAST:
+                return toBookingsOutDto(repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+            case FUTURE:
+                return toBookingsOutDto(repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+            case WAITING:
+            case REJECTED:
+                return toBookingsOutDto(repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(state)));
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<BookingOutDto> findAllOwner(Long userId, String state) {
+        userService.findById(userId);
+
+        State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
+                .orElseThrow(() -> new ObjectIllegalArgumentException("Unknown state: UNSUPPORTED_STATUS"));
+
+        switch (st) {
+            case ALL:
+                return toBookingsOutDto(repository.findAllByOwnerOrderByStartDesc(userId));
+            case CURRENT:
+                return toBookingsOutDto(repository.findAllByOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+            case PAST:
+                return toBookingsOutDto(repository.findAllByOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+            case FUTURE:
+                return toBookingsOutDto(repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+            case WAITING:
+            case REJECTED:
+                return toBookingsOutDto(repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(state)));
+        }
+        return new ArrayList<>();
+    }
+
+    private List<BookingOutDto> toBookingsOutDto(List<Booking> bookings) {
+        return bookings.stream().map(booking -> BookingMapper.toBookingOutDto(booking,
+                userService.findById(booking.getBookerId()),
+                itemService.findById(booking.getItemId()))).collect(Collectors.toList());
     }
 }

@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.UserServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,10 +56,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> findAllByOwner(Long userId) {
+    public List<ItemDto> findAllByOwnerId(Long userId) {
         userService.findById(userId);
-        List<Item> items = repository.findAllByOwnerId(userId);
-        return ItemMapper.toItemsDto(items);
+        return toItemsDto(repository.findAllByOwnerId(userId));
     }
 
     @Override
@@ -72,5 +72,15 @@ public class ItemServiceImpl implements ItemService {
             return repository.search(text);
         }
         return new ArrayList<>();
+    }
+
+    public Long findItemOwnerIdById(Long itemId) {
+        return repository.findById(itemId)
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Item with id=%d not found", itemId)))
+                .getOwnerId();
+    }
+
+    private List<ItemDto> toItemsDto(List<Item> items) {
+        return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 }

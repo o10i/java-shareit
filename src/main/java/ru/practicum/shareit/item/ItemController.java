@@ -31,8 +31,8 @@ public class ItemController {
     }
 
     @GetMapping()
-    public List<ItemDto> findAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return service.findAllByOwner(userId);
+    public List<ItemDto> findAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return service.findAllByOwnerId(userId);
     }
 
     @DeleteMapping("{itemId}")

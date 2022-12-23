@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,11 +41,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> findAll() {
-        return UserMapper.toUsersDto(repository.findAll());
+        return toUsersDto(repository.findAll());
     }
 
     @Override
     public void deleteById(Long userId) {
         repository.deleteById(userId);
+    }
+
+    private List<UserDto> toUsersDto(List<User> users) {
+        return users.stream().map(UserMapper::toUserDto).collect(Collectors.toList());
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exception.ObjectAlreadyExistsException;
 import ru.practicum.shareit.exception.ObjectNotEqualException;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
-import ru.practicum.shareit.exception.ObjectUnavailableException;
+import ru.practicum.shareit.exception.ObjectIllegalArgumentException;
 
 @RestControllerAdvice
 @Slf4j
@@ -36,7 +36,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleObjectUnavailableException(final ObjectUnavailableException e) {
+    public ErrorResponse handleObjectUnavailableException(final ObjectIllegalArgumentException e) {
         log.error(e.getLocalizedMessage(), e.getMessage());
         return new ErrorResponse(e.getMessage());
     }

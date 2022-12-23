@@ -32,7 +32,7 @@ public class UserController {
         return service.findAll();
     }
 
-    @DeleteMapping("{userId}")
+    @DeleteMapping("/{userId}")
     public void deleteById(@PathVariable Long userId) {
         service.deleteById(userId);
     }

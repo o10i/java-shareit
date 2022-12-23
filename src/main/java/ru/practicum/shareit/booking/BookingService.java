@@ -1,7 +1,15 @@
 package ru.practicum.shareit.booking;
 
+import java.util.List;
+
 public interface BookingService {
-    BookingDto save(Long userId, BookingDto bookingDto);
-    
-//    List<Booking> findByBookerAndEndIsBefore(Long bookerId, LocalDateTime end, Sort sort);
+    BookingOutDto save(Long userId, BookingInDto bookingInDto);
+
+    BookingOutDto approve(Long userId, Long bookingId, Boolean approved);
+
+    BookingOutDto findById(Long userId, Long bookingId);
+
+    List<BookingOutDto> findAll(Long userId, String state);
+
+    List<BookingOutDto> findAllOwner(Long userId, String state);
 }
