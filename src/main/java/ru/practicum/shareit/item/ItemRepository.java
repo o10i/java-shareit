@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
+    List<Item> findAllByOwner(Long userId);
+
     @Query("select new ru.practicum.shareit.item.ItemDto(i.id, i.name, i.description, i.available, i.owner) " +
             "from Item i " +
             "where i.available = true " +

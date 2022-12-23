@@ -9,7 +9,7 @@ interface ItemService {
 
     ItemDto findById(Long itemId);
 
-    List<ItemDto> findAll(Long userId);
+    List<ItemDto> findAllByOwner(Long userId);
 
     void deleteById(Long itemId);
 
