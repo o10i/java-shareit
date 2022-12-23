@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
@@ -15,13 +16,13 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(name = "start_date")
-    String start;
+    LocalDateTime start;
     @Column(name = "end_date")
-    String end;
+    LocalDateTime end;
     @Column(name = "item_id")
-    Long item;
+    Long itemId;
     @Column(name = "booker_id")
-    Long booker;
+    Long bookerId;
     @Enumerated(EnumType.STRING)
     Status status;
 }

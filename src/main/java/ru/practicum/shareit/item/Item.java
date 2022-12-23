@@ -20,7 +20,7 @@ public class Item {
     @Column(name = "is_available")
     Boolean available;
     @Column(name = "owner_id")
-    Long owner;
+    Long ownerId;
     @Column(name = "request_id")
-    Long request;
+    Long requestId;
 }

@@ -21,5 +21,4 @@ public class ItemDto {
     String description;
     @NotNull
     Boolean available;
-    Long owner;
 }
