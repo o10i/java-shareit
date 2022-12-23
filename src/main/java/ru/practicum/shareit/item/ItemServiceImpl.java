@@ -4,8 +4,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.ObjectNotEqualException;
-import ru.practicum.shareit.exception.ObjectNotFoundException;
+import ru.practicum.shareit.exception.ForbiddenException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserServiceImpl;
 
 import java.util.ArrayList;
@@ -31,9 +31,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         Item item = repository.findById(itemId)
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("Item with id=%d not found", itemId)));
+                .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)));
         if (!userId.equals(item.getOwnerId())) {
-            throw new ObjectNotEqualException(String.format("userId=%d and owner=%d are not equal", userId, item.getOwnerId()));
+            throw new ForbiddenException(String.format("userId=%d and owner=%d are not equal", userId, item.getOwnerId()));
         }
         if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
@@ -51,7 +51,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto findById(Long itemId) {
         Item item = repository.findById(itemId)
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("Item with id=%d not found", itemId)));
+                .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)));
         return ItemMapper.toItemDto(item);
     }
 
@@ -76,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
 
     public Long findItemOwnerIdById(Long itemId) {
         return repository.findById(itemId)
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("Item with id=%d not found", itemId)))
+                .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)))
                 .getOwnerId();
     }
 

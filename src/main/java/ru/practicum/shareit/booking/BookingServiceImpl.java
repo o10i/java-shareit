@@ -4,9 +4,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.ObjectIllegalArgumentException;
-import ru.practicum.shareit.exception.ObjectNotEqualException;
-import ru.practicum.shareit.exception.ObjectNotFoundException;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemDto;
 import ru.practicum.shareit.item.ItemServiceImpl;
 import ru.practicum.shareit.user.UserDto;
@@ -28,18 +27,24 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingOutDto save(Long userId, BookingInDto bookingInDto) {
+        Long ownerId = itemService.findItemOwnerIdById(bookingInDto.getItemId());
+
+        if (userId.equals(ownerId)) {
+            throw new NotFoundException(String.format("userId=%d equals ownerId=%d.", userId, ownerId));
+        }
+
         Long itemId = bookingInDto.getItemId();
         ItemDto item = itemService.findById(itemId);
 
         if (!item.getAvailable()) {
-            throw new ObjectIllegalArgumentException(String.format("Item with id=%d unavailable.", itemId));
+            throw new BadRequestException(String.format("Item with id=%d unavailable.", itemId));
         }
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime start = bookingInDto.getStart();
         LocalDateTime end = bookingInDto.getEnd();
         if (start.isBefore(now) || end.isBefore(now) || end.isBefore(start)) {
-            throw new ObjectIllegalArgumentException(String.format("start=%s or end=%s has invalid value.", start, end));
+            throw new BadRequestException(String.format("start=%s or end=%s has invalid value.", start, end));
         }
 
         UserDto booker = userService.findById(userId);
@@ -53,8 +58,19 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingOutDto approve(Long userId, Long bookingId, Boolean approved) {
+        userService.findById(userId);
         Booking booking = repository.findById(bookingId)
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("Booking with id=%d not found", bookingId)));
+                .orElseThrow(() -> new NotFoundException(String.format("Booking with id=%d not found", bookingId)));
+
+        Long ownerId = itemService.findItemOwnerIdById(booking.getItemId());
+        if (!userId.equals(ownerId)) {
+            throw new NotFoundException(String.format("userId=%d not equal to ownerId=%d", userId, ownerId));
+        }
+
+        if (booking.getStatus().equals(Status.APPROVED)) {
+            throw new BadRequestException("Booking with id=%d already approved.");
+        }
+
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         repository.save(booking);
         return BookingMapper.toBookingOutDto(booking,
@@ -66,12 +82,12 @@ public class BookingServiceImpl implements BookingService {
     public BookingOutDto findById(Long userId, Long bookingId) {
         userService.findById(userId);
         Booking booking = repository.findById(bookingId)
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("Booking with id=%d not found", bookingId)));
+                .orElseThrow(() -> new NotFoundException(String.format("Booking with id=%d not found", bookingId)));
 
         Long bookerId = booking.getBookerId();
         Long ownerId = itemService.findItemOwnerIdById(booking.getItemId());
         if (!userId.equals(bookerId) && !userId.equals(ownerId)) {
-            throw new ObjectNotEqualException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
+            throw new NotFoundException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
         }
 
         return BookingMapper.toBookingOutDto(booking,
@@ -84,7 +100,7 @@ public class BookingServiceImpl implements BookingService {
         userService.findById(userId);
 
         State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
-                .orElseThrow(() -> new ObjectIllegalArgumentException("Unknown state: UNSUPPORTED_STATUS"));
+                .orElseThrow(() -> new BadRequestException("Unknown state: UNSUPPORTED_STATUS"));
 
         switch (st) {
             case ALL:
@@ -96,8 +112,9 @@ public class BookingServiceImpl implements BookingService {
             case FUTURE:
                 return toBookingsOutDto(repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case WAITING:
+                return toBookingsOutDto(repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
             case REJECTED:
-                return toBookingsOutDto(repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(state)));
+                return toBookingsOutDto(repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
         }
         return new ArrayList<>();
     }
@@ -107,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
         userService.findById(userId);
 
         State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
-                .orElseThrow(() -> new ObjectIllegalArgumentException("Unknown state: UNSUPPORTED_STATUS"));
+                .orElseThrow(() -> new BadRequestException("Unknown state: UNSUPPORTED_STATUS"));
 
         switch (st) {
             case ALL:
@@ -119,8 +136,9 @@ public class BookingServiceImpl implements BookingService {
             case FUTURE:
                 return toBookingsOutDto(repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case WAITING:
+                return toBookingsOutDto(repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
             case REJECTED:
-                return toBookingsOutDto(repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(state)));
+                return toBookingsOutDto(repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
         }
         return new ArrayList<>();
     }
