@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserServiceImpl;
@@ -61,6 +62,13 @@ public class ItemServiceImpl implements ItemService {
         if (userId.equals(item.getOwnerId())) {
             setBookingsToItemDto(itemDto);
         }
+        List<Comment> comments = commentRepository.findAllByItemId(itemId);
+        if (comments != null) {
+            List<CommentDto> commentsDto = toFullCommentsDto(comments);
+            itemDto.setComments(commentsDto);
+        } else {
+            itemDto.setComments(new ArrayList<>());
+        }
         return itemDto;
     }
 
@@ -88,11 +96,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto) {
         userService.findById(userId);
+        List<Booking> userBookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+        userBookings.stream().filter(booking -> booking.getItemId().equals(itemId)).findFirst()
+                .orElseThrow(() -> new BadRequestException(String.format("userId=%d hasn't booking for itemId=%d in past.", userId, itemId)));
         Comment comment = CommentMapper.toComment(commentDto);
         comment.setItemId(itemId);
         comment.setAuthorId(userId);
         commentRepository.save(comment);
-        return CommentMapper.toCommentDto(comment);
+        return toFullCommentDto(comment, userService.findById(userId).getName());
     }
 
     public Long findItemOwnerIdById(Long itemId) {
@@ -111,5 +122,17 @@ public class ItemServiceImpl implements ItemService {
                 .findFirst().orElse(null));
         itemDto.setNextBooking(bookings.stream().filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
                 .findFirst().orElse(null));
+    }
+
+    private CommentDto toFullCommentDto(Comment comment, String authorName) {
+        CommentDto commentDto = CommentMapper.toCommentDto(comment);
+        commentDto.setAuthorName(authorName);
+        return commentDto;
+    }
+
+    private List<CommentDto> toFullCommentsDto(List<Comment> comments) {
+        return comments.stream().map(comment -> toFullCommentDto(comment,
+                        userService.findById(comment.getAuthorId()).getName()))
+                .collect(Collectors.toList());
     }
 }
