@@ -4,10 +4,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserServiceImpl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +20,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ItemServiceImpl implements ItemService {
     ItemRepository repository;
+    BookingRepository bookingRepository;
     UserServiceImpl userService;
 
     @Override
@@ -49,16 +53,23 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto findById(Long itemId) {
+    public ItemDto findById(Long userId, Long itemId) {
+        userService.findById(userId);
         Item item = repository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)));
-        return ItemMapper.toItemDto(item);
+        ItemDto itemDto = ItemMapper.toItemDto(item);
+        if (userId.equals(item.getOwnerId())) {
+            setBookingsToItemDto(itemDto);
+        }
+        return itemDto;
     }
 
     @Override
     public List<ItemDto> findAllByOwnerId(Long userId) {
         userService.findById(userId);
-        return toItemsDto(repository.findAllByOwnerId(userId));
+        List<ItemDto> itemsDto = toItemsDto(repository.findAllByOwnerIdOrderById(userId));
+        itemsDto.forEach(this::setBookingsToItemDto);
+        return itemsDto;
     }
 
     @Override
@@ -82,5 +93,13 @@ public class ItemServiceImpl implements ItemService {
 
     private List<ItemDto> toItemsDto(List<Item> items) {
         return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+    }
+
+    private void setBookingsToItemDto(ItemDto itemDto) {
+        List<Booking> bookings = bookingRepository.findAllByItemIdOrderByStartDesc(itemDto.getId());
+        itemDto.setLastBooking(bookings.stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
+                .findFirst().orElse(null));
+        itemDto.setNextBooking(bookings.stream().filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                .findFirst().orElse(null));
     }
 }

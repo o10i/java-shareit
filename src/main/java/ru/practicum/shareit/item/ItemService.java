@@ -7,7 +7,7 @@ interface ItemService {
 
     ItemDto update(Long userId, Long itemId, ItemDto itemDto);
 
-    ItemDto findById(Long itemId);
+    ItemDto findById(Long userId, Long itemId);
 
     List<ItemDto> findAllByOwnerId(Long userId);
 

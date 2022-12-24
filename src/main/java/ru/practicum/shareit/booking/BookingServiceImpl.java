@@ -34,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Long itemId = bookingInDto.getItemId();
-        ItemDto item = itemService.findById(itemId);
+        ItemDto item = itemService.findById(userId, itemId);
 
         if (!item.getAvailable()) {
             throw new BadRequestException(String.format("Item with id=%d unavailable.", itemId));
@@ -75,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
         repository.save(booking);
         return BookingMapper.toBookingOutDto(booking,
                 userService.findById(booking.getBookerId()),
-                itemService.findById(booking.getItemId()));
+                itemService.findById(userId, booking.getItemId()));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class BookingServiceImpl implements BookingService {
 
         return BookingMapper.toBookingOutDto(booking,
                 userService.findById(bookerId),
-                itemService.findById(booking.getItemId()));
+                itemService.findById(userId, booking.getItemId()));
     }
 
     @Override
@@ -104,17 +104,17 @@ public class BookingServiceImpl implements BookingService {
 
         switch (st) {
             case ALL:
-                return toBookingsOutDto(repository.findAllByBookerIdOrderByStartDesc(userId));
+                return toBookingsOutDto(userId, repository.findAllByBookerIdOrderByStartDesc(userId));
             case CURRENT:
-                return toBookingsOutDto(repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                return toBookingsOutDto(userId, repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
             case PAST:
-                return toBookingsOutDto(repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                return toBookingsOutDto(userId, repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
             case FUTURE:
-                return toBookingsOutDto(repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                return toBookingsOutDto(userId, repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case WAITING:
-                return toBookingsOutDto(repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
+                return toBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
             case REJECTED:
-                return toBookingsOutDto(repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
+                return toBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
         }
         return new ArrayList<>();
     }
@@ -128,24 +128,24 @@ public class BookingServiceImpl implements BookingService {
 
         switch (st) {
             case ALL:
-                return toBookingsOutDto(repository.findAllByOwnerOrderByStartDesc(userId));
+                return toBookingsOutDto(userId, repository.findAllByOwnerOrderByStartDesc(userId));
             case CURRENT:
-                return toBookingsOutDto(repository.findAllByOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                return toBookingsOutDto(userId, repository.findAllByOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
             case PAST:
-                return toBookingsOutDto(repository.findAllByOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                return toBookingsOutDto(userId, repository.findAllByOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
             case FUTURE:
-                return toBookingsOutDto(repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                return toBookingsOutDto(userId, repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case WAITING:
-                return toBookingsOutDto(repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
+                return toBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
             case REJECTED:
-                return toBookingsOutDto(repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
+                return toBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
         }
         return new ArrayList<>();
     }
 
-    private List<BookingOutDto> toBookingsOutDto(List<Booking> bookings) {
+    private List<BookingOutDto> toBookingsOutDto(Long userId, List<Booking> bookings) {
         return bookings.stream().map(booking -> BookingMapper.toBookingOutDto(booking,
                 userService.findById(booking.getBookerId()),
-                itemService.findById(booking.getItemId()))).collect(Collectors.toList());
+                itemService.findById(userId, booking.getItemId()))).collect(Collectors.toList());
     }
 }
