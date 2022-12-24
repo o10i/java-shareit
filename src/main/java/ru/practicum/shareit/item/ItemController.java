@@ -45,4 +45,11 @@ public class ItemController {
     public List<ItemDto> search(@RequestParam String text) {
         return service.search(text);
     }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto saveComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                  @PathVariable Long itemId,
+                                  @RequestBody CommentDto commentDto) {
+        return service.saveComment(userId, itemId, commentDto);
+    }
 }

@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.Booking;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,6 +25,7 @@ public class ItemDto {
     Boolean available;
     Booking lastBooking;
     Booking nextBooking;
+    List<CommentDto> comments;
 
     public ItemDto(Long id, String name, String description, Boolean available) {
         this.id = id;

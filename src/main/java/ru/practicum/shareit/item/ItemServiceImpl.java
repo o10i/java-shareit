@@ -22,14 +22,14 @@ public class ItemServiceImpl implements ItemService {
     ItemRepository repository;
     BookingRepository bookingRepository;
     UserServiceImpl userService;
+    CommentRepository commentRepository;
 
     @Override
     public ItemDto save(Long userId, ItemDto itemDto) {
         userService.findById(userId);
         Item item = ItemMapper.toItem(itemDto);
         item.setOwnerId(userId);
-        repository.save(item);
-        return ItemMapper.toItemDto(item);
+        return ItemMapper.toItemDto(repository.save(item));
     }
 
     @Override
@@ -83,6 +83,16 @@ public class ItemServiceImpl implements ItemService {
             return repository.search(text);
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto) {
+        userService.findById(userId);
+        Comment comment = CommentMapper.toComment(commentDto);
+        comment.setItemId(itemId);
+        comment.setAuthorId(userId);
+        commentRepository.save(comment);
+        return CommentMapper.toCommentDto(comment);
     }
 
     public Long findItemOwnerIdById(Long itemId) {

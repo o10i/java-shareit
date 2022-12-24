@@ -53,7 +53,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setBookerId(userId);
         booking.setStatus(Status.WAITING);
         repository.save(booking);
-        return BookingMapper.toBookingOutDto(booking, booker, item);
+        return toFullBookingOutDto(booking, booker, item);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         repository.save(booking);
-        return BookingMapper.toBookingOutDto(booking,
+        return toFullBookingOutDto(booking,
                 userService.findById(booking.getBookerId()),
                 itemService.findById(userId, booking.getItemId()));
     }
@@ -89,8 +89,7 @@ public class BookingServiceImpl implements BookingService {
         if (!userId.equals(bookerId) && !userId.equals(ownerId)) {
             throw new NotFoundException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
         }
-
-        return BookingMapper.toBookingOutDto(booking,
+        return toFullBookingOutDto(booking,
                 userService.findById(bookerId),
                 itemService.findById(userId, booking.getItemId()));
     }
@@ -104,17 +103,17 @@ public class BookingServiceImpl implements BookingService {
 
         switch (st) {
             case ALL:
-                return toBookingsOutDto(userId, repository.findAllByBookerIdOrderByStartDesc(userId));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdOrderByStartDesc(userId));
             case CURRENT:
-                return toBookingsOutDto(userId, repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
             case PAST:
-                return toBookingsOutDto(userId, repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
             case FUTURE:
-                return toBookingsOutDto(userId, repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case WAITING:
-                return toBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
             case REJECTED:
-                return toBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
         }
         return new ArrayList<>();
     }
@@ -128,24 +127,32 @@ public class BookingServiceImpl implements BookingService {
 
         switch (st) {
             case ALL:
-                return toBookingsOutDto(userId, repository.findAllByOwnerOrderByStartDesc(userId));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerOrderByStartDesc(userId));
             case CURRENT:
-                return toBookingsOutDto(userId, repository.findAllByOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
             case PAST:
-                return toBookingsOutDto(userId, repository.findAllByOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
             case FUTURE:
-                return toBookingsOutDto(userId, repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case WAITING:
-                return toBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
             case REJECTED:
-                return toBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
         }
         return new ArrayList<>();
     }
 
-    private List<BookingOutDto> toBookingsOutDto(Long userId, List<Booking> bookings) {
-        return bookings.stream().map(booking -> BookingMapper.toBookingOutDto(booking,
+    private BookingOutDto toFullBookingOutDto(Booking booking, UserDto booker, ItemDto item) {
+        BookingOutDto bookingOutDto = BookingMapper.toBookingOutDto(booking);
+        bookingOutDto.setBooker(booker);
+        bookingOutDto.setItem(item);
+        return bookingOutDto;
+    }
+
+    private List<BookingOutDto> toFullBookingsOutDto(Long userId, List<Booking> bookings) {
+        return bookings.stream().map(booking -> toFullBookingOutDto(booking,
                 userService.findById(booking.getBookerId()),
-                itemService.findById(userId, booking.getItemId()))).collect(Collectors.toList());
+                itemService.findById(userId, booking.getItemId())))
+                .collect(Collectors.toList());
     }
 }

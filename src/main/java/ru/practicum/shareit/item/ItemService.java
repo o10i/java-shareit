@@ -14,4 +14,6 @@ interface ItemService {
     void deleteById(Long itemId);
 
     List<ItemDto> search(String text);
+
+    CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto);
 }
