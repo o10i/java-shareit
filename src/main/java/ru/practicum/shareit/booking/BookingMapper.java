@@ -6,12 +6,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 class BookingMapper {
     public static BookingOutDto toBookingOutDto(Booking booking) {
-        BookingOutDto bookingOutDto = new BookingOutDto();
-        bookingOutDto.setId(booking.getId());
-        bookingOutDto.setStart(booking.getStart());
-        bookingOutDto.setEnd(booking.getEnd());
-        bookingOutDto.setStatus(booking.getStatus());
-        return bookingOutDto;
+        return new BookingOutDto(
+                booking.getId(),
+                booking.getStart(),
+                booking.getEnd(),
+                booking.getStatus(),
+                null,
+                null
+                );
     }
 
     public static Booking toBooking(BookingInDto bookingInDto) {

@@ -58,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingOutDto approve(Long userId, Long bookingId, Boolean approved) {
-        userService.findById(userId);
+        userService.findByIdWithException(userId);
         Booking booking = findByIdWithException(bookingId);
 
         Long ownerId = itemService.findByIdWithException(booking.getItemId()).getOwnerId();
@@ -79,7 +79,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingOutDto findById(Long userId, Long bookingId) {
-        userService.findById(userId);
+        userService.findByIdWithException(userId);
         Booking booking = findByIdWithException(bookingId);
 
         Long bookerId = booking.getBookerId();
@@ -94,7 +94,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingOutDto> findAll(Long userId, String state) {
-        userService.findById(userId);
+        userService.findByIdWithException(userId);
 
         State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
                 .orElseThrow(() -> new BadRequestException("Unknown state: UNSUPPORTED_STATUS"));
@@ -118,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingOutDto> findAllOwner(Long userId, String state) {
-        userService.findById(userId);
+        userService.findByIdWithException(userId);
 
         State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
                 .orElseThrow(() -> new BadRequestException("Unknown state: UNSUPPORTED_STATUS"));

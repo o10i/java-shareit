@@ -8,11 +8,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentMapper {
     public static CommentDto toCommentDto(Comment comment) {
-        CommentDto commentDto = new CommentDto();
-        commentDto.setId(comment.getId());
-        commentDto.setText(comment.getText());
-        commentDto.setCreated(comment.getCreated());
-        return commentDto;
+        return new CommentDto(
+                comment.getId(),
+                comment.getText(),
+                null,
+                comment.getCreated()
+        );
     }
 
     public static Comment toComment(CommentDto commentDto) {

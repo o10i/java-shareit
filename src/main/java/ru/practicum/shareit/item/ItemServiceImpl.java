@@ -91,10 +91,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(String text) {
-        if (!text.equals("")) {
-            return repository.search(text);
+        if (text.isBlank()) {
+            return new ArrayList<>();
         }
-        return new ArrayList<>();
+        return repository.search(text);
     }
 
     @Override
