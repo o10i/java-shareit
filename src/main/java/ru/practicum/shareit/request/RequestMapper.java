@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class RequestMapper {
+final class RequestMapper {
     public static RequestDto toRequestDto(Request request) {
         return new RequestDto(request.getId(),
                 request.getDescription(),

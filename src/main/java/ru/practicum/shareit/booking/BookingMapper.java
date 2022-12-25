@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-class BookingMapper {
+final class BookingMapper {
     public static BookingOutDto toBookingOutDto(Booking booking) {
         return new BookingOutDto(
                 booking.getId(),

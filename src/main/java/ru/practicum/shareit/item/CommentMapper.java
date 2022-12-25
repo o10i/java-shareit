@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class CommentMapper {
+final class CommentMapper {
     public static CommentDto toCommentDto(Comment comment) {
         return new CommentDto(
                 comment.getId(),
