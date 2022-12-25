@@ -20,8 +20,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(Long userId, UserDto userDto) {
-        User user = repository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
+        User user = findByIdWithException(userId);
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
         }
@@ -34,8 +33,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findById(Long userId) {
-        User user = repository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
+        User user = findByIdWithException(userId);
         return UserMapper.toUserDto(user);
     }
 
@@ -47,6 +45,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(Long userId) {
         repository.deleteById(userId);
+    }
+
+    public User findByIdWithException(Long userId) {
+        return repository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
     }
 
     private List<UserDto> toUsersDto(List<User> users) {

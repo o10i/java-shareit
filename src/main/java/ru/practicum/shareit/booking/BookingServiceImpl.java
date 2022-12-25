@@ -27,7 +27,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingOutDto save(Long userId, BookingInDto bookingInDto) {
-        Long ownerId = itemService.findItemOwnerIdById(bookingInDto.getItemId());
+        Long ownerId = itemService.findByIdWithException(bookingInDto.getItemId()).getOwnerId();
 
         if (userId.equals(ownerId)) {
             throw new NotFoundException(String.format("userId=%d equals ownerId=%d.", userId, ownerId));
@@ -59,10 +59,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingOutDto approve(Long userId, Long bookingId, Boolean approved) {
         userService.findById(userId);
-        Booking booking = repository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException(String.format("Booking with id=%d not found", bookingId)));
+        Booking booking = findByIdWithException(bookingId);
 
-        Long ownerId = itemService.findItemOwnerIdById(booking.getItemId());
+        Long ownerId = itemService.findByIdWithException(booking.getItemId()).getOwnerId();
         if (!userId.equals(ownerId)) {
             throw new NotFoundException(String.format("userId=%d not equal to ownerId=%d", userId, ownerId));
         }
@@ -81,11 +80,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingOutDto findById(Long userId, Long bookingId) {
         userService.findById(userId);
-        Booking booking = repository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException(String.format("Booking with id=%d not found", bookingId)));
+        Booking booking = findByIdWithException(bookingId);
 
         Long bookerId = booking.getBookerId();
-        Long ownerId = itemService.findItemOwnerIdById(booking.getItemId());
+        Long ownerId = itemService.findByIdWithException(booking.getItemId()).getOwnerId();
         if (!userId.equals(bookerId) && !userId.equals(ownerId)) {
             throw new NotFoundException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
         }
@@ -140,6 +138,11 @@ public class BookingServiceImpl implements BookingService {
                 return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
         }
         return new ArrayList<>();
+    }
+
+    private Booking findByIdWithException(Long bookingId) {
+        return repository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException(String.format("Booking with id=%d not found", bookingId)));
     }
 
     private BookingOutDto toFullBookingOutDto(Booking booking, UserDto booker, ItemDto item) {

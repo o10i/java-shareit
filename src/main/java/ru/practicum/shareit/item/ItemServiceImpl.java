@@ -28,7 +28,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto save(Long userId, ItemDto itemDto) {
-        userService.findById(userId);
+        userService.findByIdWithException(userId);
+
         Item item = ItemMapper.toItem(itemDto);
         item.setOwnerId(userId);
         return ItemMapper.toItemDto(repository.save(item));
@@ -36,8 +37,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
-        Item item = repository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)));
+        Item item = findByIdWithException(itemId);
+
         if (!userId.equals(item.getOwnerId())) {
             throw new ForbiddenException(String.format("userId=%d and owner=%d are not equal", userId, item.getOwnerId()));
         }
@@ -50,19 +51,20 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        repository.save(item);
-        return ItemMapper.toItemDto(item);
+        return ItemMapper.toItemDto(repository.save(item));
     }
 
     @Override
     public ItemDto findById(Long userId, Long itemId) {
-        userService.findById(userId);
-        Item item = repository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)));
+        userService.findByIdWithException(userId);
+
+        Item item = findByIdWithException(itemId);
+
         ItemDto itemDto = ItemMapper.toItemDto(item);
         if (userId.equals(item.getOwnerId())) {
             setBookingsToItemDto(itemDto);
         }
+
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
         if (comments != null) {
             List<CommentDto> commentsDto = toFullCommentsDto(comments);
@@ -75,7 +77,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findAllByOwnerId(Long userId) {
-        userService.findById(userId);
+        userService.findByIdWithException(userId);
+
         List<ItemDto> itemsDto = toItemsDto(repository.findAllByOwnerIdOrderById(userId));
         itemsDto.forEach(this::setBookingsToItemDto);
         return itemsDto;
@@ -96,21 +99,22 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto) {
-        userService.findById(userId);
+        userService.findByIdWithException(userId);
+
         List<Booking> userBookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
         userBookings.stream().filter(booking -> booking.getItemId().equals(itemId)).findFirst()
                 .orElseThrow(() -> new BadRequestException(String.format("userId=%d hasn't booking for itemId=%d in past.", userId, itemId)));
+
         Comment comment = CommentMapper.toComment(commentDto);
         comment.setItemId(itemId);
         comment.setAuthorId(userId);
         commentRepository.save(comment);
-        return toFullCommentDto(comment, userService.findById(userId).getName());
+        return toFullCommentDto(comment, userService.findByIdWithException(userId).getName());
     }
 
-    public Long findItemOwnerIdById(Long itemId) {
+    public Item findByIdWithException(Long itemId) {
         return repository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)))
-                .getOwnerId();
+                .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)));
     }
 
     private List<ItemDto> toItemsDto(List<Item> items) {
@@ -132,7 +136,7 @@ public class ItemServiceImpl implements ItemService {
 
     private List<CommentDto> toFullCommentsDto(List<Comment> comments) {
         return comments.stream().map(comment -> toFullCommentDto(comment,
-                        userService.findById(comment.getAuthorId()).getName()))
+                        userService.findByIdWithException(comment.getAuthorId()).getName()))
                 .collect(Collectors.toList());
     }
 }

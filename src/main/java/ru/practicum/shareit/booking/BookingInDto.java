@@ -15,4 +15,5 @@ import java.time.LocalDateTime;
 public class BookingInDto {
     Long itemId;
     LocalDateTime start;
-    LocalDateTime end;}
+    LocalDateTime end;
+}
