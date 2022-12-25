@@ -97,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
         userService.findByIdWithException(userId);
 
         State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
-                .orElseThrow(() -> new BadRequestException("Unknown state: UNSUPPORTED_STATUS"));
+                .orElseThrow(() -> new BadRequestException(String.format("Unknown state: %s", state)));
 
         switch (st) {
             case ALL:
@@ -109,9 +109,8 @@ public class BookingServiceImpl implements BookingService {
             case FUTURE:
                 return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case WAITING:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
             case REJECTED:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(st.name())));
         }
         return new ArrayList<>();
     }
@@ -121,7 +120,7 @@ public class BookingServiceImpl implements BookingService {
         userService.findByIdWithException(userId);
 
         State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
-                .orElseThrow(() -> new BadRequestException("Unknown state: UNSUPPORTED_STATUS"));
+                .orElseThrow(() -> new BadRequestException(String.format("Unknown state: %s", state)));
 
         switch (st) {
             case ALL:
@@ -133,9 +132,8 @@ public class BookingServiceImpl implements BookingService {
             case FUTURE:
                 return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case WAITING:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.WAITING));
             case REJECTED:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.REJECTED));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(st.name())));
         }
         return new ArrayList<>();
     }
