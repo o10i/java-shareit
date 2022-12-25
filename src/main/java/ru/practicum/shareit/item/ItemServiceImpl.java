@@ -14,6 +14,7 @@ import ru.practicum.shareit.user.UserServiceImpl;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -117,11 +118,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void setBookingsToItemDto(ItemDto itemDto) {
-        List<Booking> bookings = bookingRepository.findAllByItemIdOrderByStartDesc(itemDto.getId());
-        itemDto.setLastBooking(bookings.stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
-                .findFirst().orElse(null));
-        itemDto.setNextBooking(bookings.stream().filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
-                .findFirst().orElse(null));
+        Optional<Booking> lastBooking = bookingRepository.findLastBookingByItemId(itemDto.getId(), LocalDateTime.now());
+        itemDto.setLastBooking(lastBooking.orElse(null));
+        Optional<Booking> nextBooking = bookingRepository.findNextBookingByItemId(itemDto.getId(), LocalDateTime.now());
+        itemDto.setNextBooking(nextBooking.orElse(null));
     }
 
     private CommentDto toFullCommentDto(Comment comment, String authorName) {

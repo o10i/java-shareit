@@ -68,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         if (booking.getStatus().equals(Status.APPROVED)) {
-            throw new BadRequestException("Booking with id=%d already approved.");
+            throw new BadRequestException(String.format("Booking with id=%d already approved.", bookingId));
         }
 
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
