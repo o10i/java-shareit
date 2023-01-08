@@ -4,19 +4,18 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-class UserMapper {
+final class UserMapper {
     public static UserDto toUserDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build();
+        return new UserDto(
+                user.getId(),
+                user.getName(),
+                user.getEmail());
     }
 
     public static User toUser(UserDto userDto) {
-        return User.builder()
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .build();
+        User user = new User();
+        user.setName(userDto.getName());
+        user.setEmail(userDto.getEmail());
+        return user;
     }
 }

@@ -10,11 +10,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
-    private final UserService service;
+    private final UserServiceImpl service;
 
     @PostMapping()
-    public UserDto create(@Valid @RequestBody UserDto userDto) {
-        return service.create(userDto);
+    public UserDto save(@Valid @RequestBody UserDto userDto) {
+        return service.save(userDto);
     }
 
     @PatchMapping("/{userId}")
@@ -23,16 +23,16 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public UserDto getById(@PathVariable Long userId) {
-        return service.getById(userId);
+    public UserDto findById(@PathVariable Long userId) {
+        return service.findById(userId);
     }
 
     @GetMapping()
-    public List<UserDto> getAll() {
-        return service.getAll();
+    public List<UserDto> findAll() {
+        return service.findAll();
     }
 
-    @DeleteMapping("{userId}")
+    @DeleteMapping("/{userId}")
     public void deleteById(@PathVariable Long userId) {
         service.deleteById(userId);
     }

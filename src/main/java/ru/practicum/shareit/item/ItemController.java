@@ -10,12 +10,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
-    private final ItemService service;
+    private final ItemServiceImpl service;
 
     @PostMapping()
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @Valid @RequestBody ItemDto itemDto) {
-        return service.create(userId, itemDto);
+    public ItemDto save(@RequestHeader("X-Sharer-User-Id") Long userId,
+                        @Valid @RequestBody ItemDto itemDto) {
+        return service.save(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
@@ -26,13 +26,14 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@PathVariable Long itemId) {
-        return service.getById(itemId);
+    public ItemDto findById(@RequestHeader("X-Sharer-User-Id") Long userId,
+                            @PathVariable Long itemId) {
+        return service.findById(userId, itemId);
     }
 
     @GetMapping()
-    public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return service.getAll(userId);
+    public List<ItemDto> findAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return service.findAllByOwnerId(userId);
     }
 
     @DeleteMapping("{itemId}")
@@ -43,5 +44,12 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam String text) {
         return service.search(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto saveComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                  @PathVariable Long itemId,
+                                  @Valid @RequestBody CommentDto commentDto) {
+        return service.saveComment(userId, itemId, commentDto);
     }
 }

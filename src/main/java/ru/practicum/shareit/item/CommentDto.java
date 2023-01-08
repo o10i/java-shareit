@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.item;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -6,17 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserDto {
+public class CommentDto {
     Long id;
-    String name;
-    @Email
-    @NotNull
-    String email;
+    @NotBlank
+    String text;
+    String authorName;
+    LocalDateTime created;
 }
