@@ -3,6 +3,9 @@ package ru.practicum.shareit.booking;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.booking.enums.Status;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -19,10 +22,12 @@ public class Booking {
     LocalDateTime start;
     @Column(name = "end_date")
     LocalDateTime end;
-    @Column(name = "item_id")
-    Long itemId;
-    @Column(name = "booker_id")
-    Long bookerId;
+    @ManyToOne
+    @JoinColumn(name = "item_id")
+    Item item;
+    @ManyToOne
+    @JoinColumn(name = "booker_id")
+    User booker;
     @Enumerated(EnumType.STRING)
     Status status;
 }

@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.dto.BookingLastOrNextDto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -24,8 +24,8 @@ public class ItemDto {
     @NotNull
     Boolean available;
     Long requestId;
-    Booking lastBooking;
-    Booking nextBooking;
+    BookingLastOrNextDto lastBooking;
+    BookingLastOrNextDto nextBooking;
     List<CommentDto> comments;
 
     public ItemDto(Long id, String name, String description, Boolean available) {
