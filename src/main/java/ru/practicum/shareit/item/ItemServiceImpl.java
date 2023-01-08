@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ForbiddenException;
@@ -16,7 +17,6 @@ import ru.practicum.shareit.user.UserServiceImpl;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,8 +106,8 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto) {
         userService.findByIdWithException(userId);
 
-        List<Booking> userBookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), PageRequest.of(0, 20)).getContent();
-        userBookings.stream().filter(booking -> booking.getItemId().equals(itemId)).findFirst()
+        List<Booking> userBookings = bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), PageRequest.of(0, 20)).getContent();
+        userBookings.stream().filter(booking -> booking.getItem().getId().equals(itemId)).findFirst()
                 .orElseThrow(() -> new BadRequestException(String.format("userId=%d hasn't booking for itemId=%d in past.", userId, itemId)));
 
         Comment comment = CommentMapper.toComment(commentDto);
@@ -131,10 +131,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void setBookingsToItemDto(ItemDto itemDto) {
-        Optional<Booking> lastBooking = bookingRepository.findLastBookingByItemId(itemDto.getId(), LocalDateTime.now());
-        itemDto.setLastBooking(lastBooking.orElse(null));
-        Optional<Booking> nextBooking = bookingRepository.findNextBookingByItemId(itemDto.getId(), LocalDateTime.now());
-        itemDto.setNextBooking(nextBooking.orElse(null));
+        bookingRepository.findFirstByItem_IdAndEndBeforeOrderByEndDesc(itemDto.getId(), LocalDateTime.now())
+                .ifPresent(lastBooking -> itemDto.setLastBooking(BookingMapper.toBookingLastOrNextDto(lastBooking)));
+        bookingRepository.findFirstByItem_IdAndStartAfterOrderByStart(itemDto.getId(), LocalDateTime.now())
+                .ifPresent(nextBooking -> itemDto.setNextBooking(BookingMapper.toBookingLastOrNextDto(nextBooking)));
     }
 
     private CommentDto toFullCommentDto(Comment comment, String authorName) {

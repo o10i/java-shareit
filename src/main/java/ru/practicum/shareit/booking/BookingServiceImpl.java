@@ -5,16 +5,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingSaveDto;
+import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemDto;
 import ru.practicum.shareit.item.ItemServiceImpl;
 import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.UserServiceImpl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,120 +29,101 @@ public class BookingServiceImpl implements BookingService {
     UserServiceImpl userService;
 
     @Override
-    public BookingOutDto save(Long userId, BookingInDto bookingInDto) {
-        Long ownerId = itemService.findByIdWithException(bookingInDto.getItemId()).getOwnerId();
+    public BookingDto save(Long userId, BookingSaveDto bookingSaveDto) {
+        checkItemOwnerForSave(userId, bookingSaveDto);
+        checkBookingDates(bookingSaveDto);
 
-        if (userId.equals(ownerId)) {
-            throw new NotFoundException(String.format("userId=%d equals ownerId=%d.", userId, ownerId));
-        }
+        Item item = itemService.findByIdWithException(bookingSaveDto.getItemId());
+        checkItemAvailable(item);
 
-        Long itemId = bookingInDto.getItemId();
-        ItemDto item = itemService.findById(userId, itemId);
+        UserDto bookerDto = userService.findById(userId);
+        ItemDto itemDto = itemService.findById(userId, bookingSaveDto.getItemId());
 
-        if (!item.getAvailable()) {
-            throw new BadRequestException(String.format("Item with id=%d unavailable.", itemId));
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = bookingInDto.getStart();
-        LocalDateTime end = bookingInDto.getEnd();
-        if (start.isBefore(now) || end.isBefore(now) || end.isBefore(start)) {
-            throw new BadRequestException(String.format("start=%s or end=%s has invalid value.", start, end));
-        }
-
-        UserDto booker = userService.findById(userId);
-
-        Booking booking = BookingMapper.toBooking(bookingInDto);
-        booking.setBookerId(userId);
+        Booking booking = BookingMapper.toBooking(bookingSaveDto);
+        booking.setItem(item);
+        booking.setBooker(userService.findByIdWithException(userId));
         booking.setStatus(Status.WAITING);
         repository.save(booking);
-        return toFullBookingOutDto(booking, booker, item);
+
+        return BookingMapper.toBookingDto(booking, bookerDto, itemDto);
     }
 
     @Override
-    public BookingOutDto approve(Long userId, Long bookingId, Boolean approved) {
+    public BookingDto approve(Long userId, Long bookingId, Boolean approved) {
         userService.findByIdWithException(userId);
         Booking booking = findByIdWithException(bookingId);
 
-        Long ownerId = itemService.findByIdWithException(booking.getItemId()).getOwnerId();
-        if (!userId.equals(ownerId)) {
-            throw new NotFoundException(String.format("userId=%d not equal to ownerId=%d", userId, ownerId));
-        }
-
-        if (booking.getStatus().equals(Status.APPROVED)) {
-            throw new BadRequestException(String.format("Booking with id=%d already approved.", bookingId));
-        }
+        checkItemOwnerForApprove(userId, booking);
+        checkBookingNotApproved(booking);
 
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         repository.save(booking);
-        return toFullBookingOutDto(booking,
-                userService.findById(booking.getBookerId()),
-                itemService.findById(userId, booking.getItemId()));
+
+        UserDto userDto = userService.findById(booking.getBooker().getId());
+        ItemDto itemDto = itemService.findById(userId, booking.getItem().getId());
+
+        return BookingMapper.toBookingDto(booking, userDto, itemDto);
     }
 
     @Override
-    public BookingOutDto findById(Long userId, Long bookingId) {
+    public BookingDto findById(Long userId, Long bookingId) {
         userService.findByIdWithException(userId);
         Booking booking = findByIdWithException(bookingId);
 
-        Long bookerId = booking.getBookerId();
-        Long ownerId = itemService.findByIdWithException(booking.getItemId()).getOwnerId();
-        if (!userId.equals(bookerId) && !userId.equals(ownerId)) {
-            throw new NotFoundException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
-        }
-        return toFullBookingOutDto(booking,
-                userService.findById(bookerId),
-                itemService.findById(userId, booking.getItemId()));
+        Long bookerId = booking.getBooker().getId();
+        Long ownerId = itemService.findByIdWithException(booking.getItem().getId()).getOwnerId();
+        checkUser(userId, bookerId, ownerId);
+
+        UserDto userDto = userService.findById(bookerId);
+        ItemDto itemDto = itemService.findById(userId, booking.getItem().getId());
+
+        return BookingMapper.toBookingDto(booking, userDto, itemDto);
     }
 
     @Override
-    public List<BookingOutDto> findAll(Long userId, String state, Integer from, Integer size) {
+    public List<BookingDto> findAllByBookerId(Long userId, String state, Integer from, Integer size) {
         userService.findByIdWithException(userId);
-
-        State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
-                .orElseThrow(() -> new BadRequestException(String.format("Unknown state: %s", state)));
 
         PageRequest pageable = PageRequest.of(from / size, size);
 
-        switch (st) {
-            case ALL:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdOrderByStartDesc(userId, pageable).getContent());
-            case CURRENT:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent());
-            case PAST:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
-            case FUTURE:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
-            case WAITING:
-            case REJECTED:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(st.name()), pageable).getContent());
+        switch (state) {
+            case "ALL":
+                return toFullBookingsDto(userId, repository.findAllByBooker_IdOrderByStartDesc(userId, pageable).getContent());
+            case "CURRENT":
+                return toFullBookingsDto(userId, repository.findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent());
+            case "PAST":
+                return toFullBookingsDto(userId, repository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
+            case "FUTURE":
+                return toFullBookingsDto(userId, repository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
+            case "WAITING":
+            case "REJECTED":
+                return toFullBookingsDto(userId, repository.findAllByBooker_IdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(state), pageable).getContent());
+            default:
+                throw new BadRequestException(String.format("Unknown state: %s", state));
         }
-        return new ArrayList<>();
     }
 
     @Override
-    public List<BookingOutDto> findAllOwner(Long userId, String state, Integer from, Integer size) {
-        userService.findByIdWithException(userId);
-
-        State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
-                .orElseThrow(() -> new BadRequestException(String.format("Unknown state: %s", state)));
+    public List<BookingDto> findAllByOwnerId(Long ownerId, String state, Integer from, Integer size) {
+        userService.findByIdWithException(ownerId);
 
         PageRequest pageable = PageRequest.of(from / size, size);
 
-        switch (st) {
-            case ALL:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerOrderByStartDesc(userId, pageable).getContent());
-            case CURRENT:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent());
-            case PAST:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
-            case FUTURE:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
-            case WAITING:
-            case REJECTED:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(st.name()), pageable).getContent());
+        switch (state) {
+            case "ALL":
+                return toFullBookingsDto(ownerId, repository.findAllByItem_OwnerIdOrderByStartDesc(ownerId, pageable).getContent());
+            case "CURRENT":
+                return toFullBookingsDto(ownerId, repository.findAllByItem_OwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent());
+            case "PAST":
+                return toFullBookingsDto(ownerId, repository.findAllByItem_OwnerIdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now(), pageable).getContent());
+            case "FUTURE":
+                return toFullBookingsDto(ownerId, repository.findAllByItem_OwnerIdAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now(), pageable).getContent());
+            case "WAITING":
+            case "REJECTED":
+                return toFullBookingsDto(ownerId, repository.findAllByItem_OwnerIdAndStatusEqualsOrderByStartDesc(ownerId, Status.valueOf(state), pageable).getContent());
+            default:
+                throw new BadRequestException(String.format("Unknown state: %s", state));
         }
-        return new ArrayList<>();
     }
 
     private Booking findByIdWithException(Long bookingId) {
@@ -148,17 +131,53 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException(String.format("Booking with id=%d not found", bookingId)));
     }
 
-    private BookingOutDto toFullBookingOutDto(Booking booking, UserDto booker, ItemDto item) {
-        BookingOutDto bookingOutDto = BookingMapper.toBookingOutDto(booking);
-        bookingOutDto.setBooker(booker);
-        bookingOutDto.setItem(item);
-        return bookingOutDto;
+    private void checkItemOwnerForSave(Long userId, BookingSaveDto bookingSaveDto) {
+        Long ownerId = itemService.findByIdWithException(bookingSaveDto.getItemId()).getOwnerId();
+
+        if (userId.equals(ownerId)) {
+            throw new NotFoundException(String.format("userId=%d equals ownerId=%d.", userId, ownerId));
+        }
     }
 
-    private List<BookingOutDto> toFullBookingsOutDto(Long userId, List<Booking> bookings) {
-        return bookings.stream().map(booking -> toFullBookingOutDto(booking,
-                        userService.findById(booking.getBookerId()),
-                        itemService.findById(userId, booking.getItemId())))
+    private void checkItemOwnerForApprove(Long userId, Booking booking) {
+        Long ownerId = itemService.findByIdWithException(booking.getItem().getId()).getOwnerId();
+
+        if (!userId.equals(ownerId)) {
+            throw new NotFoundException(String.format("userId=%d not equal to ownerId=%d", userId, ownerId));
+        }
+    }
+
+    private void checkBookingNotApproved(Booking booking) {
+        if (booking.getStatus().equals(Status.APPROVED)) {
+            throw new BadRequestException(String.format("Booking with id=%d already approved.", booking.getId()));
+        }
+    }
+
+    private void checkBookingDates(BookingSaveDto bookingSaveDto) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = bookingSaveDto.getStart();
+        LocalDateTime end = bookingSaveDto.getEnd();
+        if (!start.isBefore(end) || !start.isAfter(now)) {
+            throw new BadRequestException(String.format("start=%s or end=%s has invalid value.", start, end));
+        }
+    }
+
+    private void checkItemAvailable(Item item) {
+        if (!item.getAvailable()) {
+            throw new BadRequestException(String.format("Item with id=%d unavailable.", item.getId()));
+        }
+    }
+
+    private void checkUser(Long userId, Long bookerId, Long ownerId) {
+        if (!userId.equals(bookerId) && !userId.equals(ownerId)) {
+            throw new NotFoundException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
+        }
+    }
+
+    private List<BookingDto> toFullBookingsDto(Long userId, List<Booking> bookings) {
+        return bookings.stream()
+                .map(booking -> BookingMapper.toBookingDto(booking, userService.findById(booking.getBooker().getId()),
+                        itemService.findById(userId, booking.getItem().getId())))
                 .collect(Collectors.toList());
     }
 }
