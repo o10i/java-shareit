@@ -9,11 +9,11 @@ interface ItemService {
 
     ItemDto findById(Long userId, Long itemId);
 
-    List<ItemDto> findAllByOwnerId(Long userId);
+    List<ItemDto> findAllByOwnerId(Long userId, Integer from, Integer size);
 
     void deleteById(Long itemId);
 
-    List<ItemDto> search(String text);
+    List<ItemDto> search(String text, Integer from, Integer size);
 
     CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto);
 }

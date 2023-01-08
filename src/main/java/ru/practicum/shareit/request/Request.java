@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
+import java.time.Instant;
 
 @Entity
 @Table(name = "requests")
@@ -18,5 +19,6 @@ public class Request {
     String description;
     @Column(name = "requestor_id")
     Long requestor;
-    //String created;
+    @Column
+    Instant created;
 }

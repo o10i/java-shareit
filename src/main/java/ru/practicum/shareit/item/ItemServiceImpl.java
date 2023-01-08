@@ -3,6 +3,8 @@ package ru.practicum.shareit.item;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -76,11 +78,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> findAllByOwnerId(Long userId) {
+    public List<ItemDto> findAllByOwnerId(Long userId, Integer from, Integer size) {
         userService.findByIdWithException(userId);
 
-        List<ItemDto> itemsDto = toItemsDto(repository.findAllByOwnerIdOrderById(userId));
+        Page<Item> items = repository.findAllByOwnerIdOrderById(userId, PageRequest.of(from / size, size));
+        List<ItemDto> itemsDto = items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
         itemsDto.forEach(this::setBookingsToItemDto);
+
         return itemsDto;
     }
 
@@ -90,18 +94,19 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> search(String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return repository.search(text);
+        Page<ItemDto> search = repository.search(text, PageRequest.of(from / size, size));
+        return search.getContent();
     }
 
     @Override
     public CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto) {
         userService.findByIdWithException(userId);
 
-        List<Booking> userBookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+        List<Booking> userBookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), PageRequest.of(0, 20)).getContent();
         userBookings.stream().filter(booking -> booking.getItemId().equals(itemId)).findFirst()
                 .orElseThrow(() -> new BadRequestException(String.format("userId=%d hasn't booking for itemId=%d in past.", userId, itemId)));
 
@@ -115,6 +120,10 @@ public class ItemServiceImpl implements ItemService {
     public Item findByIdWithException(Long itemId) {
         return repository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)));
+    }
+
+    public List<ItemDto> findAllByRequestId(Long requestId) {
+        return toItemsDto(repository.findAllByRequestId(requestId));
     }
 
     private List<ItemDto> toItemsDto(List<Item> items) {
