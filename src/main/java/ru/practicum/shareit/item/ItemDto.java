@@ -23,6 +23,7 @@ public class ItemDto {
     String description;
     @NotNull
     Boolean available;
+    Long requestId;
     Booking lastBooking;
     Booking nextBooking;
     List<CommentDto> comments;

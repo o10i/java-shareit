@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -93,47 +94,51 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingOutDto> findAll(Long userId, String state) {
+    public List<BookingOutDto> findAll(Long userId, String state, Integer from, Integer size) {
         userService.findByIdWithException(userId);
 
         State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
                 .orElseThrow(() -> new BadRequestException(String.format("Unknown state: %s", state)));
 
+        PageRequest pageable = PageRequest.of(from / size, size);
+
         switch (st) {
             case ALL:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdOrderByStartDesc(userId));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdOrderByStartDesc(userId, pageable).getContent());
             case CURRENT:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent());
             case PAST:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
             case FUTURE:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
             case WAITING:
             case REJECTED:
-                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(st.name())));
+                return toFullBookingsOutDto(userId, repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(st.name()), pageable).getContent());
         }
         return new ArrayList<>();
     }
 
     @Override
-    public List<BookingOutDto> findAllOwner(Long userId, String state) {
+    public List<BookingOutDto> findAllOwner(Long userId, String state, Integer from, Integer size) {
         userService.findByIdWithException(userId);
 
         State st = Arrays.stream(State.values()).filter(s -> s.name().equals(state)).findFirst()
                 .orElseThrow(() -> new BadRequestException(String.format("Unknown state: %s", state)));
 
+        PageRequest pageable = PageRequest.of(from / size, size);
+
         switch (st) {
             case ALL:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerOrderByStartDesc(userId));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerOrderByStartDesc(userId, pageable).getContent());
             case CURRENT:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent());
             case PAST:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
             case FUTURE:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent());
             case WAITING:
             case REJECTED:
-                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(st.name())));
+                return toFullBookingsOutDto(userId, repository.findAllByOwnerAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(st.name()), pageable).getContent());
         }
         return new ArrayList<>();
     }
@@ -152,8 +157,8 @@ public class BookingServiceImpl implements BookingService {
 
     private List<BookingOutDto> toFullBookingsOutDto(Long userId, List<Booking> bookings) {
         return bookings.stream().map(booking -> toFullBookingOutDto(booking,
-                userService.findById(booking.getBookerId()),
-                itemService.findById(userId, booking.getItemId())))
+                        userService.findById(booking.getBookerId()),
+                        itemService.findById(userId, booking.getItemId())))
                 .collect(Collectors.toList());
     }
 }
