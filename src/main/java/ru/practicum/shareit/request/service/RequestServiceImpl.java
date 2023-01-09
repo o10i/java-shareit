@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -8,11 +8,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemServiceImpl;
+import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.Request;
+import ru.practicum.shareit.request.RequestMapper;
+import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.request.dto.RequestWithItemsDto;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.user.UserServiceImpl;
+import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;

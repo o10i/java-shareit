@@ -1,20 +1,23 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingSaveDto;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
-import ru.practicum.shareit.item.ItemServiceImpl;
+import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.UserServiceImpl;
+import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
