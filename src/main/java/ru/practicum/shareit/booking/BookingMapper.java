@@ -5,19 +5,19 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingLastOrNextDto;
 import ru.practicum.shareit.booking.dto.BookingSaveDto;
-import ru.practicum.shareit.item.ItemDto;
+import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.user.UserDto;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BookingMapper {
-    public static BookingDto toBookingDto(Booking booking, UserDto bookerDto, ItemDto itemDto) {
+    public static BookingDto toBookingDto(Booking booking, UserDto bookerDto, ItemBookingDto itemBookingDto) {
         BookingDto bookingDto = new BookingDto();
         bookingDto.setId(booking.getId());
         bookingDto.setStart(booking.getStart());
         bookingDto.setEnd(booking.getEnd());
         bookingDto.setStatus(booking.getStatus());
         bookingDto.setBooker(bookerDto);
-        bookingDto.setItem(itemDto);
+        bookingDto.setItem(itemBookingDto);
         return bookingDto;
     }
 

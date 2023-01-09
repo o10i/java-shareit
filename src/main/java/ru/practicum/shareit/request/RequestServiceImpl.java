@@ -3,16 +3,17 @@ package ru.practicum.shareit.request;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemServiceImpl;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.dto.RequestWithItemsDto;
+import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.user.UserServiceImpl;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,51 +26,45 @@ public class RequestServiceImpl implements RequestService {
     ItemServiceImpl itemService;
 
     @Override
-    public RequestDto save(Long userId, RequestDto requestDto) {
-        userService.findByIdWithException(userId);
-
-        requestDto.setRequestor(userId);
-        requestDto.setCreated(Instant.now());
-        Request request = RequestMapper.toRequest(requestDto);
+    public RequestDto save(Long requestorId, RequestDto requestDto) {
+        userService.findByIdWithException(requestorId);
+        Request request = RequestMapper.toRequest(requestDto, requestorId);
         return RequestMapper.toRequestDto(repository.save(request));
     }
 
     @Override
-    public List<RequestDto> findAllByRequestorOrderByCreatedDesc(Long userId) {
+    public List<RequestWithItemsDto> findAllByRequestorOrderByCreatedDesc(Long userId) {
         userService.findByIdWithException(userId);
 
-        List<RequestDto> requestsDto = toRequestsDto(repository.findAllByRequestorOrderByCreatedDesc(userId));
-        requestsDto.forEach(requestDto -> requestDto.setItems(itemService.findAllByRequestId(requestDto.getId())));
-
-        return requestsDto;
+        return toRequestsDto(repository.findAllByRequestorOrderByCreatedDesc(userId));
     }
 
     @Override
-    public List<RequestDto> findAll(Long userId, Integer from, Integer size) {
+    public List<RequestWithItemsDto> findAll(Long userId, Integer from, Integer size) {
         Sort sortByCreated = Sort.by(Sort.Direction.DESC, "created");
         Pageable page = PageRequest.of(from / size, size, sortByCreated);
 
-        Page<Request> requestPage = repository.findAll(page);
-
-        List<RequestDto> requestsDto = requestPage.stream()
+        List<Request> requests = repository.findAll(page).stream()
                 .filter(request -> !request.getRequestor().equals(userId))
-                .map(RequestMapper::toRequestDto).collect(Collectors.toList());
+                .collect(Collectors.toList());
 
-        requestsDto.forEach(requestDto -> requestDto.setItems(itemService.findAllByRequestId(requestDto.getId())));
-        return requestsDto;
+        return toRequestsDto(requests);
     }
 
     @Override
-    public RequestDto findById(Long userId, Long requestId) {
+    public RequestWithItemsDto findById(Long userId, Long requestId) {
         userService.findByIdWithException(userId);
 
-        RequestDto requestDto = RequestMapper.toRequestDto(findByIdWithException(requestId));
-        requestDto.setItems(itemService.findAllByRequestId(requestDto.getId()));
-        return requestDto;
+        Request request = findByIdWithException(requestId);
+        List<ItemDto> itemDtos = itemService.findAllByRequestId(requestId);
+
+        return RequestMapper.toRequestWithItemsDto(request, itemDtos);
     }
 
-    private List<RequestDto> toRequestsDto(List<Request> requests) {
-        return requests.stream().map(RequestMapper::toRequestDto).collect(Collectors.toList());
+    private List<RequestWithItemsDto> toRequestsDto(List<Request> requests) {
+        return requests.stream()
+                .map(request -> RequestMapper.toRequestWithItemsDto(request, itemService.findAllByRequestId(request.getId())))
+                .collect(Collectors.toList());
     }
 
     private Request findByIdWithException(Long requestId) {

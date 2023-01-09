@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.item.dto.CommentDto;
 
 import java.time.LocalDateTime;
 
