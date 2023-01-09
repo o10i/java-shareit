@@ -7,6 +7,8 @@ import ru.practicum.shareit.user.service.UserServiceImpl;
 import javax.validation.Valid;
 import java.util.List;
 
+import static ru.practicum.shareit.user.UserMapper.*;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -15,22 +17,23 @@ public class UserController {
 
     @PostMapping()
     public UserDto save(@Valid @RequestBody UserDto userDto) {
-        return service.save(userDto);
+        return toUserDto(service.save(toUser(userDto)));
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@PathVariable Long userId, @RequestBody UserDto userDto) {
-        return service.update(userId, userDto);
+    public UserDto update(@PathVariable Long userId,
+                          @RequestBody UserDto userDto) {
+        return toUserDto(service.update(userId, toUser(userDto)));
     }
 
     @GetMapping("/{userId}")
     public UserDto findById(@PathVariable Long userId) {
-        return service.findById(userId);
+        return toUserDto(service.findById(userId));
     }
 
     @GetMapping()
     public List<UserDto> findAll() {
-        return service.findAll();
+        return toListUserDto(service.findAll());
     }
 
     @DeleteMapping("/{userId}")

@@ -17,6 +17,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.UserDto;
+import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.time.LocalDateTime;
@@ -39,12 +40,12 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemService.findByIdWithException(bookingSaveDto.getItemId());
         checkItemAvailable(item);
 
-        UserDto bookerDto = userService.findById(userId);
+        UserDto bookerDto = UserMapper.toUserDto(userService.findById(userId));
         ItemBookingDto itemBookingDto = itemService.findById(userId, bookingSaveDto.getItemId());
 
         Booking booking = BookingMapper.toBooking(bookingSaveDto);
         booking.setItem(item);
-        booking.setBooker(userService.findByIdWithException(userId));
+        booking.setBooker(userService.findById(userId));
         booking.setStatus(Status.WAITING);
         repository.save(booking);
 
@@ -53,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto approve(Long userId, Long bookingId, Boolean approved) {
-        userService.findByIdWithException(userId);
+        userService.findById(userId);
         Booking booking = findByIdWithException(bookingId);
 
         checkItemOwnerForApprove(userId, booking);
@@ -62,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         repository.save(booking);
 
-        UserDto userDto = userService.findById(booking.getBooker().getId());
+        UserDto userDto = UserMapper.toUserDto(userService.findById(booking.getBooker().getId()));
         ItemBookingDto itemBookingDto = itemService.findById(userId, booking.getItem().getId());
 
         return BookingMapper.toBookingDto(booking, userDto, itemBookingDto);
@@ -70,14 +71,14 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto findById(Long userId, Long bookingId) {
-        userService.findByIdWithException(userId);
+        userService.findById(userId);
         Booking booking = findByIdWithException(bookingId);
 
         Long bookerId = booking.getBooker().getId();
         Long ownerId = itemService.findByIdWithException(booking.getItem().getId()).getOwnerId();
         checkUser(userId, bookerId, ownerId);
 
-        UserDto userDto = userService.findById(bookerId);
+        UserDto userDto = UserMapper.toUserDto(userService.findById(bookerId));
         ItemBookingDto itemBookingDto = itemService.findById(userId, booking.getItem().getId());
 
         return BookingMapper.toBookingDto(booking, userDto, itemBookingDto);
@@ -85,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> findAllByBookerId(Long userId, String state, Integer from, Integer size) {
-        userService.findByIdWithException(userId);
+        userService.findById(userId);
 
         PageRequest pageable = PageRequest.of(from / size, size);
 
@@ -108,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> findAllByOwnerId(Long ownerId, String state, Integer from, Integer size) {
-        userService.findByIdWithException(ownerId);
+        userService.findById(ownerId);
 
         PageRequest pageable = PageRequest.of(from / size, size);
 
@@ -179,7 +180,7 @@ public class BookingServiceImpl implements BookingService {
 
     private List<BookingDto> toFullBookingsDto(Long userId, List<Booking> bookings) {
         return bookings.stream()
-                .map(booking -> BookingMapper.toBookingDto(booking, userService.findById(booking.getBooker().getId()),
+                .map(booking -> BookingMapper.toBookingDto(booking, UserMapper.toUserDto(userService.findById(booking.getBooker().getId())),
                         itemService.findById(userId, booking.getItem().getId())))
                 .collect(Collectors.toList());
     }

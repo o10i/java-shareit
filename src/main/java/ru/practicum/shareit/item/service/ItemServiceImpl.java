@@ -39,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto save(Long userId, ItemDto itemDto) {
-        userService.findByIdWithException(userId);
+        userService.findById(userId);
 
         Item item = ItemMapper.toItem(itemDto);
         item.setOwnerId(userId);
@@ -67,7 +67,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemBookingDto findById(Long userId, Long itemId) {
-        userService.findByIdWithException(userId);
+        userService.findById(userId);
 
         Item item = findByIdWithException(itemId);
 
@@ -88,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemBookingDto> findAllByOwnerId(Long userId, Integer from, Integer size) {
-        userService.findByIdWithException(userId);
+        userService.findById(userId);
 
         Page<Item> items = repository.findAllByOwnerIdOrderById(userId, PageRequest.of(from / size, size));
         List<ItemBookingDto> itemsDto = items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
@@ -113,7 +113,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto) {
-        userService.findByIdWithException(userId);
+        userService.findById(userId);
 
         List<Booking> userBookings = bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), PageRequest.of(0, 20)).getContent();
         userBookings.stream().filter(booking -> booking.getItem().getId().equals(itemId)).findFirst()
@@ -123,7 +123,7 @@ public class ItemServiceImpl implements ItemService {
         comment.setItemId(itemId);
         comment.setAuthorId(userId);
         commentRepository.save(comment);
-        return toFullCommentDto(comment, userService.findByIdWithException(userId).getName());
+        return toFullCommentDto(comment, userService.findById(userId).getName());
     }
 
     public Item findByIdWithException(Long itemId) {
@@ -154,7 +154,7 @@ public class ItemServiceImpl implements ItemService {
 
     private List<CommentDto> toFullCommentsDto(List<Comment> comments) {
         return comments.stream().map(comment -> toFullCommentDto(comment,
-                        userService.findByIdWithException(comment.getAuthorId()).getName()))
+                        userService.findById(comment.getAuthorId()).getName()))
                 .collect(Collectors.toList());
     }
 }
