@@ -11,7 +11,7 @@ import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.ItemDto;
+import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.ItemServiceImpl;
 import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.UserServiceImpl;
@@ -37,7 +37,7 @@ public class BookingServiceImpl implements BookingService {
         checkItemAvailable(item);
 
         UserDto bookerDto = userService.findById(userId);
-        ItemDto itemDto = itemService.findById(userId, bookingSaveDto.getItemId());
+        ItemBookingDto itemBookingDto = itemService.findById(userId, bookingSaveDto.getItemId());
 
         Booking booking = BookingMapper.toBooking(bookingSaveDto);
         booking.setItem(item);
@@ -45,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(Status.WAITING);
         repository.save(booking);
 
-        return BookingMapper.toBookingDto(booking, bookerDto, itemDto);
+        return BookingMapper.toBookingDto(booking, bookerDto, itemBookingDto);
     }
 
     @Override
@@ -60,9 +60,9 @@ public class BookingServiceImpl implements BookingService {
         repository.save(booking);
 
         UserDto userDto = userService.findById(booking.getBooker().getId());
-        ItemDto itemDto = itemService.findById(userId, booking.getItem().getId());
+        ItemBookingDto itemBookingDto = itemService.findById(userId, booking.getItem().getId());
 
-        return BookingMapper.toBookingDto(booking, userDto, itemDto);
+        return BookingMapper.toBookingDto(booking, userDto, itemBookingDto);
     }
 
     @Override
@@ -75,9 +75,9 @@ public class BookingServiceImpl implements BookingService {
         checkUser(userId, bookerId, ownerId);
 
         UserDto userDto = userService.findById(bookerId);
-        ItemDto itemDto = itemService.findById(userId, booking.getItem().getId());
+        ItemBookingDto itemBookingDto = itemService.findById(userId, booking.getItem().getId());
 
-        return BookingMapper.toBookingDto(booking, userDto, itemDto);
+        return BookingMapper.toBookingDto(booking, userDto, itemBookingDto);
     }
 
     @Override
