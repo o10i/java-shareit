@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingSaveDto;
+import ru.practicum.shareit.booking.dto.BookingInDto;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 
 import javax.validation.constraints.Min;
 import java.util.List;
+
+import static ru.practicum.shareit.booking.BookingMapper.*;
 
 @Validated
 @RestController
@@ -19,21 +21,21 @@ public class BookingController {
 
     @PostMapping()
     public BookingDto save(@RequestHeader("X-Sharer-User-Id") Long userId,
-                           @RequestBody BookingSaveDto bookingSaveDto) {
-        return service.save(userId, bookingSaveDto);
+                           @RequestBody BookingInDto bookingInDto) {
+        return toBookingDto(service.save(userId, toBooking(bookingInDto), bookingInDto.getItemId()));
     }
 
     @PatchMapping("/{bookingId}")
     public BookingDto approve(@RequestHeader("X-Sharer-User-Id") Long userId,
                                         @PathVariable Long bookingId,
                                         @RequestParam Boolean approved) {
-        return service.approve(userId, bookingId, approved);
+        return toBookingDto(service.approve(userId, bookingId, approved));
     }
 
     @GetMapping("/{bookingId}")
     public BookingDto findById(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @PathVariable Long bookingId) {
-        return service.findById(userId, bookingId);
+        return toBookingDto(service.findById(userId, bookingId));
     }
 
     @GetMapping()
@@ -41,7 +43,7 @@ public class BookingController {
                                               @RequestParam(required = false, defaultValue = "ALL") String state,
                                               @RequestParam(defaultValue = "0") @Min(0) Integer from,
                                               @RequestParam(defaultValue = "20") @Min(1) Integer size) {
-        return service.findAllByBookerId(userId, state, from, size);
+        return toListBookingDto(service.findAllByBookerId(userId, state, from, size));
     }
 
     @GetMapping("/owner")
@@ -49,6 +51,6 @@ public class BookingController {
                                              @RequestParam(required = false, defaultValue = "ALL") String state,
                                              @RequestParam(defaultValue = "0") @Min(0) Integer from,
                                              @RequestParam(defaultValue = "20") @Min(1) Integer size) {
-        return service.findAllByOwnerId(ownerId, state, from, size);
+        return toListBookingDto(service.findAllByOwnerId(ownerId, state, from, size));
     }
 }
