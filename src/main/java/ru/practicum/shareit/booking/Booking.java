@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.item.model.Item;
@@ -11,7 +13,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
-@Data
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Booking {
     @Id
