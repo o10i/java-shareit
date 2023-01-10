@@ -2,9 +2,8 @@ package ru.practicum.shareit.booking;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingInDto;
-import ru.practicum.shareit.booking.dto.BookingLastOrNextDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,19 +16,15 @@ public final class BookingMapper {
                 .start(booking.getStart())
                 .end(booking.getEnd())
                 .status(booking.getStatus())
-                .booker(new BookingDto.User(booking.getBooker().getId(), booking.getBooker().getName()))
+                .booker(new BookingDto.User(booking.getBooker().getId()))
                 .item(new BookingDto.Item(booking.getItem().getId(), booking.getItem().getName()))
                 .build();
     }
 
-    public static BookingLastOrNextDto toBookingLastOrNextDto(Booking booking) {
-        return new BookingLastOrNextDto(booking.getId(), booking.getBooker().getId());
-    }
-
-    public static Booking toBooking(BookingInDto bookingInDto) {
+    public static Booking toBooking(BookingShortDto bookingShortDto) {
         Booking booking = new Booking();
-        booking.setStart(bookingInDto.getStart());
-        booking.setEnd(bookingInDto.getEnd());
+        booking.setStart(bookingShortDto.getStart());
+        booking.setEnd(bookingShortDto.getEnd());
         return booking;
     }
 

@@ -3,31 +3,30 @@ package ru.practicum.shareit.item.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemBookingDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.CommentMapper;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
+
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -37,64 +36,68 @@ public class ItemServiceImpl implements ItemService {
     UserServiceImpl userService;
     CommentRepository commentRepository;
 
+    @Transactional
     @Override
-    public ItemDto save(Long userId, ItemDto itemDto) {
-        userService.findById(userId);
+    public Item save(Item item) {
+        userService.findByIdWithCheck(item.getOwnerId());
+        return repository.save(item);
+    }
 
-        Item item = ItemMapper.toItem(itemDto);
-        item.setOwnerId(userId);
-        return ItemMapper.toItemRequestDto(repository.save(item));
+    @Transactional
+    @Override
+    public Item update(Long itemId, Item item) {
+        userService.findByIdWithCheck(item.getOwnerId());
+
+        Item itemToUpdate = findByIdWithCheck(itemId);
+
+        if (!item.getOwnerId().equals(itemToUpdate.getOwnerId())) {
+            throw new ForbiddenException(String.format("userId=%d and owner=%d are not equal", item.getOwnerId(), itemToUpdate.getOwnerId()));
+        }
+        if (item.getName() != null && !item.getName().isBlank()) {
+            itemToUpdate.setName(item.getName());
+        }
+        if (item.getDescription() != null && !item.getDescription().isBlank()) {
+            itemToUpdate.setDescription(item.getDescription());
+        }
+        if (item.getAvailable() != null) {
+            itemToUpdate.setAvailable(item.getAvailable());
+        }
+
+        return itemToUpdate;
     }
 
     @Override
-    public ItemBookingDto update(Long userId, Long itemId, ItemBookingDto itemBookingDto) {
-        Item item = findByIdWithException(itemId);
+    public Item findById(Long userId, Long itemId) {
+        userService.findByIdWithCheck(userId);
 
-        if (!userId.equals(item.getOwnerId())) {
-            throw new ForbiddenException(String.format("userId=%d and owner=%d are not equal", userId, item.getOwnerId()));
-        }
-        if (itemBookingDto.getName() != null) {
-            item.setName(itemBookingDto.getName());
-        }
-        if (itemBookingDto.getDescription() != null) {
-            item.setDescription(itemBookingDto.getDescription());
-        }
-        if (itemBookingDto.getAvailable() != null) {
-            item.setAvailable(itemBookingDto.getAvailable());
-        }
-        return ItemMapper.toItemDto(repository.save(item));
-    }
+        Item item = findByIdWithCheck(itemId);
+        item.setComments(commentRepository.findAllByItemId(itemId));
 
-    @Override
-    public ItemBookingDto findById(Long userId, Long itemId) {
-        userService.findById(userId);
-
-        Item item = findByIdWithException(itemId);
-
-        ItemBookingDto itemBookingDto = ItemMapper.toItemDto(item);
         if (userId.equals(item.getOwnerId())) {
-            setBookingsToItemDto(itemBookingDto);
+            item.setLastBooking(bookingRepository.findFirstByItem_IdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now()));
+            item.setNextBooking(bookingRepository.findFirstByItem_IdAndStartAfterOrderByStart(itemId, LocalDateTime.now()));
         }
 
-        List<Comment> comments = commentRepository.findAllByItemId(itemId);
-        if (comments != null) {
-            List<CommentDto> commentsDto = toFullCommentsDto(comments);
-            itemBookingDto.setComments(commentsDto);
-        } else {
-            itemBookingDto.setComments(new ArrayList<>());
-        }
-        return itemBookingDto;
+        return item;
     }
 
     @Override
-    public List<ItemBookingDto> findAllByOwnerId(Long userId, Integer from, Integer size) {
-        userService.findById(userId);
+    public List<Item> findAllByOwnerId(Long userId, Integer from, Integer size) {
+        userService.findByIdWithCheck(userId);
 
-        Page<Item> items = repository.findAllByOwnerIdOrderById(userId, PageRequest.of(from / size, size));
-        List<ItemBookingDto> itemsDto = items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
-        itemsDto.forEach(this::setBookingsToItemDto);
+        List<Item> items = repository.findAllByOwnerIdOrderById(userId, PageRequest.of(from / size, size)).getContent();
 
-        return itemsDto;
+        Map<Item, Set<Comment>> comments = commentRepository.findByItemIn(items)
+                .stream()
+                .collect(groupingBy(Comment::getItem, toSet()));
+
+        items.forEach(item -> {
+            item.setComments(comments.get(item));
+            item.setLastBooking(bookingRepository.findFirstByItem_IdAndEndBeforeOrderByEndDesc(item.getId(), LocalDateTime.now()));
+            item.setNextBooking(bookingRepository.findFirstByItem_IdAndStartAfterOrderByStart(item.getId(), LocalDateTime.now()));
+        });
+
+        return items;
     }
 
     @Override
@@ -103,58 +106,35 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemBookingDto> search(String text, Integer from, Integer size) {
+    public List<Item> search(String text, Integer from, Integer size) {
         if (text.isBlank()) {
-            return new ArrayList<>();
+            return List.of();
         }
-        Page<ItemBookingDto> search = repository.search(text, PageRequest.of(from / size, size));
-        return search.getContent();
+        return repository.search(text, PageRequest.of(from / size, size)).getContent();
     }
 
+    @Transactional
     @Override
-    public CommentDto saveComment(Long userId, Long itemId, CommentDto commentDto) {
-        userService.findById(userId);
+    public Comment saveComment(Long authorId, Long itemId, Comment comment) {
+        User author = userService.findByIdWithCheck(authorId);
+        Item item = findByIdWithCheck(itemId);
 
-        List<Booking> userBookings = bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), PageRequest.of(0, 20)).getContent();
+        List<Booking> userBookings = bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(authorId, LocalDateTime.now(), PageRequest.of(0, 20)).getContent();
         userBookings.stream().filter(booking -> booking.getItem().getId().equals(itemId)).findFirst()
-                .orElseThrow(() -> new BadRequestException(String.format("userId=%d hasn't booking for itemId=%d in past.", userId, itemId)));
+                .orElseThrow(() -> new BadRequestException(String.format("userId=%d hasn't booking for itemId=%d in past.", authorId, itemId)));
 
-        Comment comment = CommentMapper.toComment(commentDto);
-        comment.setItemId(itemId);
-        comment.setAuthorId(userId);
-        commentRepository.save(comment);
-        return toFullCommentDto(comment, userService.findById(userId).getName());
+        comment.setItem(item);
+        comment.setAuthor(author);
+
+        return commentRepository.save(comment);
     }
 
-    public Item findByIdWithException(Long itemId) {
+    public Item findByIdWithCheck(Long itemId) {
         return repository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)));
     }
 
-    public List<ItemDto> findAllByRequestId(Long requestId) {
-        return toItemsRequestDto(repository.findAllByRequestId(requestId));
-    }
-
-    private List<ItemDto> toItemsRequestDto(List<Item> items) {
-        return items.stream().map(ItemMapper::toItemRequestDto).collect(Collectors.toList());
-    }
-
-    private void setBookingsToItemDto(ItemBookingDto itemBookingDto) {
-        bookingRepository.findFirstByItem_IdAndEndBeforeOrderByEndDesc(itemBookingDto.getId(), LocalDateTime.now())
-                .ifPresent(lastBooking -> itemBookingDto.setLastBooking(BookingMapper.toBookingLastOrNextDto(lastBooking)));
-        bookingRepository.findFirstByItem_IdAndStartAfterOrderByStart(itemBookingDto.getId(), LocalDateTime.now())
-                .ifPresent(nextBooking -> itemBookingDto.setNextBooking(BookingMapper.toBookingLastOrNextDto(nextBooking)));
-    }
-
-    private CommentDto toFullCommentDto(Comment comment, String authorName) {
-        CommentDto commentDto = CommentMapper.toCommentDto(comment);
-        commentDto.setAuthorName(authorName);
-        return commentDto;
-    }
-
-    private List<CommentDto> toFullCommentsDto(List<Comment> comments) {
-        return comments.stream().map(comment -> toFullCommentDto(comment,
-                        userService.findById(comment.getAuthorId()).getName()))
-                .collect(Collectors.toList());
+    public List<Item> findAllByRequestId(Long requestId) {
+        return repository.findAllByRequestId(requestId);
     }
 }

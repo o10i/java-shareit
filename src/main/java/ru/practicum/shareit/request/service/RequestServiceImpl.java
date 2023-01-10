@@ -9,12 +9,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.Request;
-import ru.practicum.shareit.request.RequestMapper;
 import ru.practicum.shareit.request.RequestRepository;
-import ru.practicum.shareit.request.dto.RequestWithItemsDto;
-import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.util.List;
@@ -29,45 +25,43 @@ public class RequestServiceImpl implements RequestService {
     ItemServiceImpl itemService;
 
     @Override
-    public RequestDto save(Long requestorId, RequestDto requestDto) {
-        userService.findById(requestorId);
-        Request request = RequestMapper.toRequest(requestDto, requestorId);
-        return RequestMapper.toRequestDto(repository.save(request));
+    public Request save(Request request) {
+        userService.findByIdWithCheck(request.getRequestor());
+        return repository.save(request);
     }
 
     @Override
-    public List<RequestWithItemsDto> findAllByRequestorOrderByCreatedDesc(Long userId) {
-        userService.findById(userId);
+    public List<Request> findAllByRequestor(Long requestorId) {
+        userService.findByIdWithCheck(requestorId);
 
-        return toRequestsDto(repository.findAllByRequestorOrderByCreatedDesc(userId));
+        List<Request> requests = repository.findAllByRequestorOrderByCreatedDesc(requestorId);
+        requests.forEach(request -> request.setItems(itemService.findAllByRequestId(request.getId())));
+
+        return requests;
     }
 
     @Override
-    public List<RequestWithItemsDto> findAll(Long userId, Integer from, Integer size) {
+    public List<Request> findAll(Long userId, Integer from, Integer size) {
         Sort sortByCreated = Sort.by(Sort.Direction.DESC, "created");
+
         Pageable page = PageRequest.of(from / size, size, sortByCreated);
 
         List<Request> requests = repository.findAll(page).stream()
                 .filter(request -> !request.getRequestor().equals(userId))
                 .collect(Collectors.toList());
+        requests.forEach(request -> request.setItems(itemService.findAllByRequestId(request.getId())));
 
-        return toRequestsDto(requests);
+        return requests;
     }
 
     @Override
-    public RequestWithItemsDto findById(Long userId, Long requestId) {
-        userService.findById(userId);
+    public Request findById(Long userId, Long requestId) {
+        userService.findByIdWithCheck(userId);
 
         Request request = findByIdWithException(requestId);
-        List<ItemDto> itemDtos = itemService.findAllByRequestId(requestId);
+        request.setItems(itemService.findAllByRequestId(requestId));
 
-        return RequestMapper.toRequestWithItemsDto(request, itemDtos);
-    }
-
-    private List<RequestWithItemsDto> toRequestsDto(List<Request> requests) {
-        return requests.stream()
-                .map(request -> RequestMapper.toRequestWithItemsDto(request, itemService.findAllByRequestId(request.getId())))
-                .collect(Collectors.toList());
+        return request;
     }
 
     private Request findByIdWithException(Long requestId) {

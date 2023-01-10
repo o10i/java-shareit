@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.shareit.booking.enums.Status;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     Page<Booking> findAllByBooker_IdOrderByStartDesc(Long userId, Pageable pageable);
@@ -29,7 +28,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Page<Booking> findAllByItem_OwnerIdAndStatusEqualsOrderByStartDesc(Long ownerId, Status status, Pageable pageable);
 
-    Optional<Booking> findFirstByItem_IdAndEndBeforeOrderByEndDesc(Long itemId, LocalDateTime dateTime);
+    Booking findFirstByItem_IdAndEndBeforeOrderByEndDesc(Long itemId, LocalDateTime dateTime);
 
-    Optional<Booking> findFirstByItem_IdAndStartAfterOrderByStart(Long itemId, LocalDateTime dateTime);
+    Booking findFirstByItem_IdAndStartAfterOrderByStart(Long itemId, LocalDateTime dateTime);
 }

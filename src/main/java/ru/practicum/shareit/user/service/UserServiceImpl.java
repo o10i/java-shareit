@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User update(Long userId, User user) {
-        User userToUpdate = findById(userId);
+        User userToUpdate = findByIdWithCheck(userId);
         if (user.getName() != null && !user.getName().isBlank()) {
             userToUpdate.setName(user.getName());
         }
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(Long userId) {
+    public User findByIdWithCheck(Long userId) {
         return repository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
     }

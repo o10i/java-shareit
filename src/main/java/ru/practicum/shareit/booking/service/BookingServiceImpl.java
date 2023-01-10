@@ -11,12 +11,9 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.time.LocalDateTime;
@@ -34,9 +31,14 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public Booking save(Long userId, Booking booking, Long itemId) {
-        checkBookingDates(booking);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = booking.getStart();
+        LocalDateTime end = booking.getEnd();
+        if (!start.isBefore(end) || !start.isAfter(now)) {
+            throw new BadRequestException(String.format("start=%s or end=%s has invalid value.", start, end));
+        }
 
-        Item item = itemService.findByIdWithException(itemId);
+        Item item = itemService.findByIdWithCheck(itemId);
         if (userId.equals(item.getOwnerId())) {
             throw new NotFoundException(String.format("userId=%d equals ownerId=%d.", userId, item.getOwnerId()));
         }
@@ -44,7 +46,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException(String.format("Item with id=%d unavailable.", item.getId()));
         }
 
-        User booker = userService.findById(userId);
+        User booker = userService.findByIdWithCheck(userId);
 
         booking.setItem(item);
         booking.setBooker(booker);
@@ -56,39 +58,37 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public Booking approve(Long userId, Long bookingId, Boolean approved) {
-        userService.findById(userId);
-        Booking booking = findByIdWithException(bookingId);
+        userService.findByIdWithCheck(userId);
 
-        checkItemOwnerForApprove(userId, booking);
-        checkBookingNotApproved(booking);
-
+        Booking booking = findByIdWithCheck(bookingId);
+        if (!userId.equals(booking.getItem().getOwnerId())) {
+            throw new NotFoundException(String.format("userId=%d not equal to ownerId=%d", userId, booking.getItem().getOwnerId()));
+        }
+        if (!booking.getStatus().equals(Status.WAITING)) {
+            throw new BadRequestException(String.format("Booking with id=%d already approved.", booking.getId()));
+        }
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
-        repository.save(booking);
-
-        UserDto userDto = UserMapper.toUserDto(userService.findById(booking.getBooker().getId()));
-        ItemBookingDto itemBookingDto = itemService.findById(userId, booking.getItem().getId());
-
         return booking;
     }
 
     @Override
     public Booking findById(Long userId, Long bookingId) {
-        userService.findById(userId);
-        Booking booking = findByIdWithException(bookingId);
+        userService.findByIdWithCheck(userId);
+
+        Booking booking = findByIdWithCheck(bookingId);
 
         Long bookerId = booking.getBooker().getId();
-        Long ownerId = itemService.findByIdWithException(booking.getItem().getId()).getOwnerId();
-        checkUser(userId, bookerId, ownerId);
-
-        UserDto userDto = UserMapper.toUserDto(userService.findById(bookerId));
-        ItemBookingDto itemBookingDto = itemService.findById(userId, booking.getItem().getId());
+        Long ownerId = booking.getItem().getOwnerId();
+        if (!userId.equals(bookerId) && !userId.equals(ownerId)) {
+            throw new NotFoundException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
+        }
 
         return booking;
     }
 
     @Override
     public List<Booking> findAllByBookerId(Long userId, String state, Integer from, Integer size) {
-        userService.findById(userId);
+        userService.findByIdWithCheck(userId);
 
         PageRequest pageable = PageRequest.of(from / size, size);
 
@@ -111,7 +111,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> findAllByOwnerId(Long ownerId, String state, Integer from, Integer size) {
-        userService.findById(ownerId);
+        userService.findByIdWithCheck(ownerId);
 
         PageRequest pageable = PageRequest.of(from / size, size);
 
@@ -132,38 +132,8 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private Booking findByIdWithException(Long bookingId) {
+    private Booking findByIdWithCheck(Long bookingId) {
         return repository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException(String.format("Booking with id=%d not found", bookingId)));
-    }
-
-
-    private void checkItemOwnerForApprove(Long userId, Booking booking) {
-        Long ownerId = itemService.findByIdWithException(booking.getItem().getId()).getOwnerId();
-
-        if (!userId.equals(ownerId)) {
-            throw new NotFoundException(String.format("userId=%d not equal to ownerId=%d", userId, ownerId));
-        }
-    }
-
-    private void checkBookingNotApproved(Booking booking) {
-        if (booking.getStatus().equals(Status.APPROVED)) {
-            throw new BadRequestException(String.format("Booking with id=%d already approved.", booking.getId()));
-        }
-    }
-
-    private void checkBookingDates(Booking booking) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = booking.getStart();
-        LocalDateTime end = booking.getEnd();
-        if (!start.isBefore(end) || !start.isAfter(now)) {
-            throw new BadRequestException(String.format("start=%s or end=%s has invalid value.", start, end));
-        }
-    }
-
-    private void checkUser(Long userId, Long bookerId, Long ownerId) {
-        if (!userId.equals(bookerId) && !userId.equals(ownerId)) {
-            throw new NotFoundException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
-        }
     }
 }

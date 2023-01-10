@@ -23,7 +23,6 @@ public class BookingDto {
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public static class User {
         Long id;
-        String name;
     }
 
     @Data
