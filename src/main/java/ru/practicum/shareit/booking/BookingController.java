@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingInDto;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
 
@@ -21,8 +22,8 @@ public class BookingController {
 
     @PostMapping()
     public BookingDto save(@RequestHeader("X-Sharer-User-Id") Long userId,
-                           @RequestBody BookingInDto bookingInDto) {
-        return toBookingDto(service.save(userId, toBooking(bookingInDto), bookingInDto.getItemId()));
+                           @Valid @RequestBody BookingShortDto bookingShortDto) {
+        return toBookingDto(service.save(userId, toBooking(bookingShortDto), bookingShortDto.getItemId()));
     }
 
     @PatchMapping("/{bookingId}")

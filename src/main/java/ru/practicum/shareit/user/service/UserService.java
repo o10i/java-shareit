@@ -9,7 +9,7 @@ interface UserService {
 
     User update(Long userId, User user);
 
-    User findById(Long userId);
+    User findByIdWithCheck(Long userId);
 
     List<User> findAll();
 

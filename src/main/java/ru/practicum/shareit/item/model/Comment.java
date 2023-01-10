@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.model;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -17,10 +18,12 @@ public class Comment {
     Long id;
     @Column
     String text;
-    @Column(name = "item_id")
-    Long itemId;
-    @Column(name = "author_id")
-    Long authorId;
+    @ManyToOne
+    @JoinColumn(name = "item_id", referencedColumnName = "id", nullable = false)
+    Item item;
+    @ManyToOne
+    @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
+    User author;
     @Column
     LocalDateTime created;
 }

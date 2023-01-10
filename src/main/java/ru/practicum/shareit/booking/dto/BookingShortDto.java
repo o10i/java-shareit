@@ -9,9 +9,8 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BookingInDto {
+public class BookingShortDto {
     @NotNull
     Long itemId;
     @FutureOrPresent
