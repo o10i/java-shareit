@@ -1,15 +1,16 @@
 package ru.practicum.shareit.request.service;
 
-import ru.practicum.shareit.request.Request;
+import ru.practicum.shareit.request.dto.RequestDto;
+import ru.practicum.shareit.request.dto.RequestShortDto;
 
 import java.util.List;
 
 public interface RequestService {
-    Request save(Request request);
+    RequestDto save(Long requestorId, RequestShortDto requestShortDto);
 
-    List<Request> findAllByRequestor(Long userId);
+    List<RequestDto> findAllByRequestor(Long userId);
 
-    List<Request> findAll(Long userId, Integer from, Integer size);
+    List<RequestDto> findAll(Long userId, Integer from, Integer size);
 
-    Request findById(Long userId, Long requestId);
+    RequestDto findById(Long userId, Long requestId);
 }

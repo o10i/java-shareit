@@ -3,8 +3,9 @@ package ru.practicum.shareit.request;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.request.dto.RequestShortDto;
 import ru.practicum.shareit.request.dto.RequestDto;
+import ru.practicum.shareit.request.dto.RequestShortDto;
+import ru.practicum.shareit.user.User;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,17 +18,17 @@ public final class RequestMapper {
         return new RequestDto(request.getId(),
                 request.getDescription(),
                 request.getCreated(),
-                request.getItems() == null ? List.of() : ItemMapper.toListItemSaveDto(request.getItems()));
+                request.getItems() == null ? List.of() : ItemMapper.toListItemShortDto(request.getItems()));
     }
 
     public static List<RequestDto> toListRequestDto(List<Request> requests) {
         return requests.stream().map(RequestMapper::toRequestDto).collect(Collectors.toList());
     }
 
-    public static Request toRequest(RequestShortDto requestShortDto, Long requestorId) {
+    public static Request toRequest(RequestShortDto requestShortDto, User requestor) {
         Request request = new Request();
         request.setDescription(requestShortDto.getDescription());
-        request.setRequestor(requestorId);
+        request.setRequestor(requestor);
         request.setCreated(Instant.now());
         return request;
     }

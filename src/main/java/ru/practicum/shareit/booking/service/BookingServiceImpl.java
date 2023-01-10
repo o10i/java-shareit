@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -18,6 +20,8 @@ import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static ru.practicum.shareit.booking.BookingMapper.*;
 
 @Transactional(readOnly = true)
 @Service
@@ -30,15 +34,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public Booking save(Long userId, Booking booking, Long itemId) {
+    public BookingDto save(Long userId, BookingShortDto bookingShortDto) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = booking.getStart();
-        LocalDateTime end = booking.getEnd();
+        LocalDateTime start = bookingShortDto.getStart();
+        LocalDateTime end = bookingShortDto.getEnd();
         if (!start.isBefore(end) || !start.isAfter(now)) {
             throw new BadRequestException(String.format("start=%s or end=%s has invalid value.", start, end));
         }
 
-        Item item = itemService.findByIdWithCheck(itemId);
+        Item item = itemService.findByIdWithCheck(bookingShortDto.getItemId());
         if (userId.equals(item.getOwnerId())) {
             throw new NotFoundException(String.format("userId=%d equals ownerId=%d.", userId, item.getOwnerId()));
         }
@@ -47,17 +51,12 @@ public class BookingServiceImpl implements BookingService {
         }
 
         User booker = userService.findByIdWithCheck(userId);
-
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(Status.WAITING);
-
-        return repository.save(booking);
+        return toBookingDto(repository.save(toBooking(bookingShortDto, item, booker)));
     }
 
     @Transactional
     @Override
-    public Booking approve(Long userId, Long bookingId, Boolean approved) {
+    public BookingDto approve(Long userId, Long bookingId, Boolean approved) {
         userService.findByIdWithCheck(userId);
 
         Booking booking = findByIdWithCheck(bookingId);
@@ -68,11 +67,11 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException(String.format("Booking with id=%d already approved.", booking.getId()));
         }
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
-        return booking;
+        return toBookingDto(booking);
     }
 
     @Override
-    public Booking findById(Long userId, Long bookingId) {
+    public BookingDto findById(Long userId, Long bookingId) {
         userService.findByIdWithCheck(userId);
 
         Booking booking = findByIdWithCheck(bookingId);
@@ -83,50 +82,50 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format("userId=%d not equal to bookerId=%d or ownerId=%d", userId, bookerId, ownerId));
         }
 
-        return booking;
+        return toBookingDto(booking);
     }
 
     @Override
-    public List<Booking> findAllByBookerId(Long userId, String state, Integer from, Integer size) {
-        userService.findByIdWithCheck(userId);
+    public List<BookingDto> findAllByBookerId(Long bookerId, String state, Integer from, Integer size) {
+        userService.findByIdWithCheck(bookerId);
 
         PageRequest pageable = PageRequest.of(from / size, size);
 
         switch (state) {
             case "ALL":
-                return repository.findAllByBooker_IdOrderByStartDesc(userId, pageable).getContent();
+                return toListBookingDto(repository.findAllByBookerIdOrderByStartDesc(bookerId, pageable).getContent());
             case "CURRENT":
-                return repository.findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent();
+                return toListBookingDto(repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent());
             case "PAST":
-                return repository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent();
+                return toListBookingDto(repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now(), pageable).getContent());
             case "FUTURE":
-                return repository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), pageable).getContent();
+                return toListBookingDto(repository.findAllByBookerIdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now(), pageable).getContent());
             case "WAITING":
             case "REJECTED":
-                return repository.findAllByBooker_IdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(state), pageable).getContent();
+                return toListBookingDto(repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(bookerId, Status.valueOf(state), pageable).getContent());
             default:
                 throw new BadRequestException(String.format("Unknown state: %s", state));
         }
     }
 
     @Override
-    public List<Booking> findAllByOwnerId(Long ownerId, String state, Integer from, Integer size) {
+    public List<BookingDto> findAllByOwnerId(Long ownerId, String state, Integer from, Integer size) {
         userService.findByIdWithCheck(ownerId);
 
         PageRequest pageable = PageRequest.of(from / size, size);
 
         switch (state) {
             case "ALL":
-                return repository.findAllByItem_OwnerIdOrderByStartDesc(ownerId, pageable).getContent();
+                return toListBookingDto(repository.findAllByItemOwnerIdOrderByStartDesc(ownerId, pageable).getContent());
             case "CURRENT":
-                return repository.findAllByItem_OwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent();
+                return toListBookingDto(repository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now(), pageable).getContent());
             case "PAST":
-                return repository.findAllByItem_OwnerIdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now(), pageable).getContent();
+                return toListBookingDto(repository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now(), pageable).getContent());
             case "FUTURE":
-                return repository.findAllByItem_OwnerIdAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now(), pageable).getContent();
+                return toListBookingDto(repository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now(), pageable).getContent());
             case "WAITING":
             case "REJECTED":
-                return repository.findAllByItem_OwnerIdAndStatusEqualsOrderByStartDesc(ownerId, Status.valueOf(state), pageable).getContent();
+                return toListBookingDto(repository.findAllByItemOwnerIdAndStatusEqualsOrderByStartDesc(ownerId, Status.valueOf(state), pageable).getContent());
             default:
                 throw new BadRequestException(String.format("Unknown state: %s", state));
         }

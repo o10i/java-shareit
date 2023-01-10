@@ -11,37 +11,34 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ItemMapper {
-    public static ItemShortDto toItemSaveDto(Item item) {
-        return ItemShortDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .requestId(item.getRequestId())
-                .build();
+    public static ItemShortDto toItemShortDto(Item item) {
+        return new ItemShortDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                item.getRequestId());
     }
 
-    public static List<ItemShortDto> toListItemSaveDto(List<Item> items) {
-        return items.stream().map(ItemMapper::toItemSaveDto).collect(Collectors.toList());
+    public static List<ItemShortDto> toListItemShortDto(List<Item> items) {
+        return items.stream().map(ItemMapper::toItemShortDto).collect(Collectors.toList());
     }
-
 
     public static ItemDto toItemDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .lastBooking(item.getLastBooking() == null ? null :
+        return new ItemDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                item.getLastBooking() == null ? null :
                         new ItemDto.BookingDto(
                                 item.getLastBooking().getId(),
-                                item.getLastBooking().getBooker().getId()))
-                .nextBooking(item.getNextBooking() == null ? null :
+                                item.getLastBooking().getBooker().getId()),
+                item.getNextBooking() == null ? null :
                         new ItemDto.BookingDto(
                                 item.getNextBooking().getId(),
-                                item.getNextBooking().getBooker().getId()))
-                .comments(item.getComments() == null ? null : CommentMapper.toListCommentDto(item.getComments()))
-                .build();
+                                item.getNextBooking().getBooker().getId()),
+                item.getComments() == null ? null : CommentMapper.toListCommentDto(item.getComments()));
     }
 
     public static List<ItemDto> toListItemDto(List<Item> items) {

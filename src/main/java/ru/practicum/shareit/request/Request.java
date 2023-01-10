@@ -1,9 +1,11 @@
 package ru.practicum.shareit.request;
 
 import lombok.AccessLevel;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -11,7 +13,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "requests")
-@Data
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Request {
     @Id
@@ -19,8 +22,9 @@ public class Request {
     Long id;
     @Column
     String description;
-    @Column(name = "requestor_id")
-    Long requestor;
+    @ManyToOne
+    @JoinColumn(name = "requestor_id", referencedColumnName = "id", nullable = false)
+    User requestor;
     @Column
     Instant created;
     @Transient

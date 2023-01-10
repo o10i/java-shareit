@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.Booking;
 
@@ -9,19 +11,20 @@ import java.util.Set;
 
 @Entity
 @Table(name = "items")
-@Data
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column
+    @Column(nullable = false)
     String name;
-    @Column
+    @Column(nullable = false)
     String description;
-    @Column(name = "is_available")
+    @Column(name = "is_available", nullable = false)
     Boolean available;
-    @Column(name = "owner_id")
+    @Column(name = "owner_id", nullable = false)
     Long ownerId;
     @Column(name = "request_id")
     Long requestId;
