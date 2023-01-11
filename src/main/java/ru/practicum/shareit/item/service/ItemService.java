@@ -16,8 +16,6 @@ public interface ItemService {
 
     List<ItemDto> findAllByOwnerId(Long userId, Integer from, Integer size);
 
-    void deleteById(Long itemId);
-
     List<ItemShortDto> search(String text, Integer from, Integer size);
 
     CommentDto saveComment(Long userId, Long itemId, Comment comment);
