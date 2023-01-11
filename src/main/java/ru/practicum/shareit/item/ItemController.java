@@ -47,11 +47,6 @@ public class ItemController {
         return service.findAllByOwnerId(userId, from, size);
     }
 
-    @DeleteMapping("{itemId}")
-    public void deleteById(@PathVariable Long itemId) {
-        service.deleteById(itemId);
-    }
-
     @GetMapping("/search")
     public List<ItemShortDto> search(@RequestParam String text,
                                      @RequestParam(defaultValue = "0") @Min(0) Integer from,

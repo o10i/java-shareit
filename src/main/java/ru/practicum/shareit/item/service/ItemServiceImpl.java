@@ -120,11 +120,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void deleteById(Long itemId) {
-        repository.deleteById(itemId);
-    }
-
-    @Override
     public List<ItemShortDto> search(String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return List.of();

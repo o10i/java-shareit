@@ -1,8 +1,6 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.Booking;
 
@@ -13,6 +11,8 @@ import java.util.Set;
 @Table(name = "items")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Item {
     @Id
