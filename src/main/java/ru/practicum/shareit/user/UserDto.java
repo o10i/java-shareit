@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserDto {
     Long id;
+    @NotBlank
     String name;
     @Email
     @NotBlank

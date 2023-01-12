@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Data
@@ -14,11 +12,8 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemDto {
     Long id;
-    @NotBlank
     String name;
-    @NotBlank
     String description;
-    @NotNull
     Boolean available;
     BookingDto lastBooking;
     BookingDto nextBooking;
