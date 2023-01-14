@@ -31,9 +31,9 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class BookingServiceImplTest {
+    BookingService service;
     @Mock
     BookingRepository repository;
-    BookingService service;
     @Mock
     ItemServiceImpl itemService;
     @Mock
