@@ -64,7 +64,7 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format("userId=%d not equal to ownerId=%d", userId, booking.getItem().getOwnerId()));
         }
         if (!booking.getStatus().equals(Status.WAITING)) {
-            throw new BadRequestException(String.format("Booking with id=%d already approved.", booking.getId()));
+            throw new BadRequestException(String.format("Booking with id=%d hasn't WAITING status.", booking.getId()));
         }
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         return toBookingDto(booking);
