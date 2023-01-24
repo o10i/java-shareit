@@ -1,28 +1,37 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemShortDto;
+import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
+import static ru.practicum.shareit.item.mapper.CommentMapper.toComment;
+
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
-    private final ItemServiceImpl service;
+    private final ItemService service;
 
     @PostMapping()
-    public ItemDto save(@RequestHeader("X-Sharer-User-Id") Long userId,
-                        @Valid @RequestBody ItemDto itemDto) {
-        return service.save(userId, itemDto);
+    public ItemShortDto save(@RequestHeader("X-Sharer-User-Id") Long ownerId,
+                             @Valid @RequestBody ItemShortDto itemShortDto) {
+        return service.save(ownerId, itemShortDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @PathVariable Long itemId,
-                          @RequestBody ItemDto itemDto) {
-        return service.update(userId, itemId, itemDto);
+    public ItemShortDto update(@RequestHeader("X-Sharer-User-Id") Long ownerId,
+                               @PathVariable Long itemId,
+                               @RequestBody ItemShortDto itemShortDto) {
+        return service.update(itemId, ownerId, itemShortDto);
     }
 
     @GetMapping("/{itemId}")
@@ -32,24 +41,23 @@ public class ItemController {
     }
 
     @GetMapping()
-    public List<ItemDto> findAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return service.findAllByOwnerId(userId);
-    }
-
-    @DeleteMapping("{itemId}")
-    public void deleteById(@PathVariable Long itemId) {
-        service.deleteById(itemId);
+    public List<ItemDto> findAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                          @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                          @RequestParam(defaultValue = "20") @Min(1) Integer size) {
+        return service.findAllByOwnerId(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam String text) {
-        return service.search(text);
+    public List<ItemShortDto> search(@RequestParam String text,
+                                     @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                     @RequestParam(defaultValue = "20") @Min(1) Integer size) {
+        return service.search(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto saveComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public CommentDto saveComment(@RequestHeader("X-Sharer-User-Id") Long authorId,
                                   @PathVariable Long itemId,
                                   @Valid @RequestBody CommentDto commentDto) {
-        return service.saveComment(userId, itemId, commentDto);
+        return service.saveComment(authorId, itemId, toComment(commentDto));
     }
 }
