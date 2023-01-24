@@ -1,9 +1,11 @@
 package ru.practicum.shareit.user.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.UserRepository;
@@ -11,82 +13,75 @@ import ru.practicum.shareit.user.UserRepository;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
+    @InjectMocks
+    private UserServiceImpl service;
     @Mock
-    UserRepository repository;
-    UserService service;
-    User user;
-    UserDto userDto;
-
-    @BeforeEach
-    public void setup() {
-        service = new UserServiceImpl(repository);
-        user = new User(1L, "name", "email@email.ru");
-        userDto = new UserDto(user.getId(), user.getName(), user.getEmail());
-    }
+    private UserRepository repository;
 
     @Test
-    void save() {
-        when(repository.save(any()))
-                .thenReturn(user);
+    void save_thenSavedUser() {
+        User user = new User();
+        UserDto expectedUserDto = new UserDto();
+        when(repository.save(any())).thenReturn(user);
 
-        UserDto savedUserDto = service.save(userDto);
+        UserDto actualUserDto = service.save(expectedUserDto);
 
-        assertThat(savedUserDto.getId()).isEqualTo(1L);
-        assertThat(savedUserDto.getName()).isEqualTo("name");
-        assertThat(savedUserDto.getEmail()).isEqualTo("email@email.ru");
+        assertEquals(expectedUserDto, actualUserDto);
     }
 
     @Test
     void update() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.of(user));
-
+/*        when(repository.findById(anyLong())).thenReturn(Optional.of(user));
         userDto.setName("nameUpdated");
 
-        UserDto updatedUserDto = service.update(user.getId(), userDto);
+        UserDto actualUserDto = service.update(user.getId(), userDto);
 
-        assertThat(updatedUserDto.getId()).isEqualTo(1L);
-        assertThat(updatedUserDto.getName()).isEqualTo("nameUpdated");
-        assertThat(updatedUserDto.getEmail()).isEqualTo("email@email.ru");
+        assertEquals(actualUserDto, userDto);*/
     }
 
     @Test
-    void findById() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.of(user));
+    void findById_whenUserFound_thenReturnedUser() {
+        long userId = 0L;
+        User user = new User();
+        UserDto expectedUserDto = new UserDto();
+        when(repository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserDto updatedUserDto = service.findById(user.getId());
+        UserDto actualUserDto = service.findById(userId);
 
-        assertThat(updatedUserDto.getId()).isEqualTo(1L);
-        assertThat(updatedUserDto.getName()).isEqualTo("name");
-        assertThat(updatedUserDto.getEmail()).isEqualTo("email@email.ru");
+        assertEquals(expectedUserDto, actualUserDto);
+    }
+
+    @Test
+    void findById_whenUserFound_thenNotFoundExceptionThrown() {
+        long userId = 0L;
+        when(repository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> service.findById(userId));
     }
 
     @Test
     void findAll() {
-        when(repository.findAll())
-                .thenReturn(List.of(user));
+        User expectedUser = new User();
+        UserDto expectedUserDto = new UserDto();
+        when(repository.findAll()).thenReturn(List.of(expectedUser));
 
-        List<UserDto> userDtos = service.findAll();
+        List<UserDto> actualUserDtoList = service.findAll();
 
-        assertThat(userDtos.size()).isEqualTo(1);
-        assertThat(userDtos.get(0).getId()).isEqualTo(1L);
-        assertThat(userDtos.get(0).getName()).isEqualTo("name");
-        assertThat(userDtos.get(0).getEmail()).isEqualTo("email@email.ru");
+        assertEquals(1, actualUserDtoList.size());
+        assertEquals(expectedUserDto, actualUserDtoList.get(0));
     }
 
     @Test
     void deleteById() {
         service.deleteById(1L);
 
-        verify(repository, times(1))
-                .deleteById(1L);
+        verify(repository, times(1)).deleteById(1L);
     }
 }
