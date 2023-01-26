@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @JsonTest
-class BookItemRequestDtoJsonTest {
+class BookingRequestDtoJsonTest {
     @Autowired
-    private JacksonTester<BookItemRequestDto> json;
+    private JacksonTester<BookingRequestDto> json;
 
     @Test
     void testBookingShortDto() throws Exception {
-        BookItemRequestDto bookItemRequestDto = new BookItemRequestDto(1L, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusDays(1));
+        BookingRequestDto bookingRequestDto = new BookingRequestDto(1L, LocalDateTime.now().plusHours(1), LocalDateTime.now().plusDays(1));
 
-        JsonContent<BookItemRequestDto> result = json.write(bookItemRequestDto);
+        JsonContent<BookingRequestDto> result = json.write(bookingRequestDto);
 
         assertThat(result).extractingJsonPathNumberValue("$.itemId").isEqualTo(1);
         assertThat(result).extractingJsonPathStringValue("$.start").isNotNull();

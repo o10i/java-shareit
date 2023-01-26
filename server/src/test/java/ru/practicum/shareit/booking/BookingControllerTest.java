@@ -8,7 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookItemRequestDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -33,7 +33,7 @@ class BookingControllerTest {
             Status.WAITING,
             new BookingDto.User(1L),
             new BookingDto.Item(1L, "Отвертка"));
-    private final BookItemRequestDto bookItemRequestDto = new BookItemRequestDto(
+    private final BookingRequestDto bookingRequestDto = new BookingRequestDto(
             2L,
             LocalDateTime.now().plusHours(1),
             LocalDateTime.now().plusDays(1));
@@ -51,7 +51,7 @@ class BookingControllerTest {
 
         mvc.perform(post("/bookings")
                         .header("X-Sharer-User-Id", 1L)
-                        .content(mapper.writeValueAsString(bookItemRequestDto))
+                        .content(mapper.writeValueAsString(bookingRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -112,7 +112,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void findAllByBookerId() throws Exception {
+    void getAllByBooker() throws Exception {
         when(service.getAllByBooker(any(), any(), any(), any()))
                 .thenReturn(List.of(bookingDto));
 
@@ -130,7 +130,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void findAllByOwnerId() throws Exception {
+    void getAllByOwner() throws Exception {
         when(service.getAllByOwner(any(), any(), any(), any()))
                 .thenReturn(List.of(bookingDto));
 

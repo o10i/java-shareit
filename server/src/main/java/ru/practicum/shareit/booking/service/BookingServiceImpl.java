@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.booking.dto.BookItemRequestDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.exception.BadRequestException;
@@ -34,15 +34,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingDto add(Long userId, BookItemRequestDto bookItemRequestDto) {
+    public BookingDto add(Long userId, BookingRequestDto bookingRequestDto) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = bookItemRequestDto.getStart();
-        LocalDateTime end = bookItemRequestDto.getEnd();
+        LocalDateTime start = bookingRequestDto.getStart();
+        LocalDateTime end = bookingRequestDto.getEnd();
         if (!start.isBefore(end) || !start.isAfter(now)) {
             throw new BadRequestException(String.format("start=%s or end=%s has invalid value.", start, end));
         }
 
-        Item item = itemService.findByIdWithCheck(bookItemRequestDto.getItemId());
+        Item item = itemService.findByIdWithCheck(bookingRequestDto.getItemId());
         if (userId.equals(item.getOwnerId())) {
             throw new NotFoundException(String.format("userId=%d equals ownerId=%d.", userId, item.getOwnerId()));
         }
@@ -51,7 +51,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         User booker = userService.findByIdWithCheck(userId);
-        return toBookingDto(repository.save(toBooking(bookItemRequestDto, item, booker)));
+        return toBookingDto(repository.save(toBooking(bookingRequestDto, item, booker)));
     }
 
     @Transactional

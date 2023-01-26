@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookItemRequestDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
@@ -16,8 +16,8 @@ public class BookingController {
 
     @PostMapping()
     public BookingDto add(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @RequestBody BookItemRequestDto bookItemRequestDto) {
-        return service.add(userId, bookItemRequestDto);
+                          @RequestBody BookingRequestDto bookingRequestDto) {
+        return service.add(userId, bookingRequestDto);
     }
 
     @GetMapping("/{bookingId}")
@@ -28,17 +28,17 @@ public class BookingController {
 
     @GetMapping()
     public List<BookingDto> getAllByBooker(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                           @RequestParam String state,
-                                           @RequestParam Integer from,
-                                           @RequestParam Integer size) {
+                                           @RequestParam(required = false) String state,
+                                           @RequestParam(required = false) Integer from,
+                                           @RequestParam(required = false) Integer size) {
         return service.getAllByBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                          @RequestParam String state,
-                                          @RequestParam Integer from,
-                                          @RequestParam Integer size) {
+                                          @RequestParam(required = false) String state,
+                                          @RequestParam(required = false) Integer from,
+                                          @RequestParam(required = false) Integer size) {
         return service.getAllByOwner(userId, state, from, size);
     }
 
