@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 import static ru.practicum.shareit.item.mapper.CommentMapper.toCommentDto;
@@ -93,8 +94,8 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getAllByOwner(Long userId, Integer from, Integer size) {
         userService.findByIdWithCheck(userId);
 
-        List<Item> items = repository
-                .findAllByOwnerIdOrderById(userId, PageRequest.of(from / size, size)).getContent();
+        List<Item> items = repository.findAllByOwnerIdOrderById(userId)
+                .stream().skip(from).limit(size).collect(Collectors.toList());
 
         Map<Item, Set<Comment>> comments = commentRepository.findAllByItemIn(items)
                 .stream()

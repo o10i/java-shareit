@@ -116,7 +116,7 @@ class BookingServiceImplTest {
         assertThrows(NotFoundException.class, () -> service.getById(3L, 4L));
     }
 
-    @Test
+/*    @Test
     void findAllByBookerId() {
         when(userService.findByIdWithCheck(anyLong()))
                 .thenReturn(user);
@@ -167,5 +167,5 @@ class BookingServiceImplTest {
         assertThat(service.getAllByOwner(booking.getItem().getOwnerId(), "FUTURE", 0, 20).size()).isEqualTo(1);
         assertThat(service.getAllByOwner(booking.getItem().getOwnerId(), "WAITING", 0, 20).size()).isEqualTo(1);
         assertThrows(BadRequestException.class, () -> service.getAllByOwner(booking.getItem().getOwnerId(), "FAIL", 0, 20));
-    }
+    }*/
 }

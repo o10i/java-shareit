@@ -1,7 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.enums.Status;
@@ -12,25 +10,25 @@ import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    Page<Booking> findAllByBookerIdOrderByStartDesc(Long bookerId, Pageable pageable);
+    List<Booking> findAllByBookerIdOrderByStartDesc(Long userId);
 
-    Page<Booking> findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(Long bookerId, LocalDateTime start, LocalDateTime end, Pageable pageable);
+    List<Booking> findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(Long userId, LocalDateTime start, LocalDateTime end);
 
-    Page<Booking> findAllByBookerIdAndEndBeforeOrderByStartDesc(Long bookerId, LocalDateTime dateTime, Pageable pageable);
+    List<Booking> findAllByBookerIdAndEndBeforeOrderByStartDesc(Long userId, LocalDateTime dateTime);
 
-    Page<Booking> findAllByBookerIdAndStartAfterOrderByStartDesc(Long bookerId, LocalDateTime dateTime, Pageable pageable);
+    List<Booking> findAllByBookerIdAndStartAfterOrderByStartDesc(Long userId, LocalDateTime dateTime);
 
-    Page<Booking> findAllByBookerIdAndStatusEqualsOrderByStartDesc(Long bookerId, Status status, Pageable pageable);
+    List<Booking> findAllByBookerIdAndStatusEqualsOrderByStartDesc(Long userId, Status status);
 
-    Page<Booking> findAllByItemOwnerIdOrderByStartDesc(Long ownerId, Pageable pageable);
+    List<Booking> findAllByItemOwnerIdOrderByStartDesc(Long userId);
 
-    Page<Booking> findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(Long ownerId, LocalDateTime start, LocalDateTime end, Pageable pageable);
+    List<Booking> findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(Long userId, LocalDateTime start, LocalDateTime end);
 
-    Page<Booking> findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(Long ownerId, LocalDateTime dateTime, Pageable pageable);
+    List<Booking> findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(Long userId, LocalDateTime dateTime);
 
-    Page<Booking> findAllByItemOwnerIdAndStartAfterOrderByStartDesc(Long ownerId, LocalDateTime dateTime, Pageable pageable);
+    List<Booking> findAllByItemOwnerIdAndStartAfterOrderByStartDesc(Long userId, LocalDateTime dateTime);
 
-    Page<Booking> findAllByItemOwnerIdAndStatusEqualsOrderByStartDesc(Long ownerId, Status status, Pageable pageable);
+    List<Booking> findAllByItemOwnerIdAndStatusEqualsOrderByStartDesc(Long userId, Status status);
 
     Booking findFirstByItemIdAndEndBeforeAndStatusEqualsOrderByEndDesc(Long itemId, LocalDateTime dateTime, Status status);
 
@@ -40,5 +38,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByItemInAndStartAfterAndStatusEqualsOrderByStart(List<Item> items, LocalDateTime dateTime, Status status);
 
-    List<Booking> findAllByBookerIdAndItemIdAndEndBeforeAndStatusEquals(Long bookerId, Long itemId, LocalDateTime time, Status status);
+    List<Booking> findAllByBookerIdAndItemIdAndEndBeforeAndStatusEquals(Long userId, Long itemId, LocalDateTime time, Status status);
 }

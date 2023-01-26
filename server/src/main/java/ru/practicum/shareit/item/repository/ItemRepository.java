@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    Page<Item> findAllByOwnerIdOrderById(Long userId, Pageable pageable);
+    List<Item> findAllByOwnerIdOrderById(Long userId);
 
     List<Item> findAllByRequestId(Long requestId);
 

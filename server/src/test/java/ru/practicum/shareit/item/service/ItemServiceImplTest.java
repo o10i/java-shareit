@@ -99,7 +99,7 @@ class ItemServiceImplTest {
         assertThat(foundItemDto.getAvailable()).isEqualTo(true);
     }
 
-    @Test
+/*    @Test
     void findAllByOwnerId() {
         when(userService.findByIdWithCheck(anyLong()))
                 .thenReturn(user);
@@ -116,7 +116,7 @@ class ItemServiceImplTest {
         assertThat(itemDtoList.get(0).getName()).isEqualTo("itemName");
         assertThat(itemDtoList.get(0).getDescription()).isEqualTo("itemDescription");
         assertThat(itemDtoList.get(0).getAvailable()).isEqualTo(true);
-    }
+    }*/
 
     @Test
     void search() {

@@ -38,10 +38,9 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<Object> getAllByBooker(@RequestHeader("X-Sharer-User-Id") long userId,
                                                       @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                                      @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                      @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
+                                                      @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                      @Positive @RequestParam(defaultValue = "10") Integer size) {
+        BookingState state = BookingState.getBookingState(stateParam);
         log.info("Get bookings by booker with state {}, userId={}, from={}, size={}", state, userId, from, size);
         return bookingClient.getAllByBooker(userId, state, from, size);
     }
@@ -49,10 +48,9 @@ public class BookingController {
     @GetMapping("/owner")
     public ResponseEntity<Object> getAllByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
                                                      @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                                     @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                     @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
+                                                     @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                     @Positive @RequestParam(defaultValue = "10") Integer size) {
+        BookingState state = BookingState.getBookingState(stateParam);
         log.info("Get bookings by owner with state {}, userId={}, from={}, size={}", state, userId, from, size);
         return bookingClient.getAllByOwner(userId, state, from, size);
     }
