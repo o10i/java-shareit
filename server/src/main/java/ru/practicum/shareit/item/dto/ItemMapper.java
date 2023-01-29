@@ -18,7 +18,7 @@ public final class ItemMapper {
                 item.getRequestId());
     }
 
-    public static List<ItemRequestDto> toListItemRequestDto(List<Item> items) {
+    public static List<ItemRequestDto> toItemRequestDtoList(List<Item> items) {
         return items.stream().map(ItemMapper::toItemRequestDto).collect(Collectors.toList());
     }
 
@@ -36,10 +36,10 @@ public final class ItemMapper {
                         new ItemDto.BookingDto(
                                 item.getNextBooking().getId(),
                                 item.getNextBooking().getBooker().getId()),
-                item.getComments() == null ? null : CommentMapper.toListCommentDto(item.getComments()));
+                item.getComments() == null ? null : CommentMapper.toCommentDtoList(item.getComments()));
     }
 
-    public static List<ItemDto> toListItemDto(List<Item> items) {
+    public static List<ItemDto> toItemDtoList(List<Item> items) {
         return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 

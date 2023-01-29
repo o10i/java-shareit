@@ -1,109 +1,92 @@
 package ru.practicum.shareit.request.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.dto.RequestRequestDto;
+import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class RequestServiceImplTest {
+    @InjectMocks
+    private RequestServiceImpl service;
     @Mock
-    RequestRepository repository;
-    RequestService service;
+    private UserServiceImpl userService;
     @Mock
-    UserServiceImpl userService;
+    private RequestRepository repository;
     @Mock
-    ItemRepository itemRepository;
-    User requestor;
-    Request request;
-    RequestRequestDto requestRequestDto;
+    private ItemRepository itemRepository;
 
-    @BeforeEach
-    public void setup() {
-        service = new RequestServiceImpl(repository, userService, itemRepository);
-        requestor = new User(1L, "name", "email@email.ru");
-        request = new Request(1L, "description", requestor, Instant.now(), null);
-        requestRequestDto = new RequestRequestDto("description");
+    @Test
+    void save_thenSavedRequestDtoReturned() {
+        Request request = getRequest();
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(getUser());
+        when(repository.save(any())).thenReturn(request);
+
+        RequestDto actualRequestDto = service.save(request.getId(), new RequestRequestDto("description"));
+
+        assertEquals(getRequestDto(), actualRequestDto);
     }
 
     @Test
-    void save() {
-        when(userService.getByIdWithCheck(any()))
-                .thenReturn(requestor);
-        when(repository.save(any()))
-                .thenReturn(request);
+    void getById_thenFoundRequestDtoReturned() {
+        User requestor = getUser();
+        Request request = getRequest();
+        when(userService.getByIdWithCheck(any())).thenReturn(requestor);
+        when(repository.findById(any())).thenReturn(Optional.of(request));
 
-        RequestDto savedRequestDto = service.save(request.getId(), requestRequestDto);
+        RequestDto actualRequestDto = service.getById(requestor.getId(), request.getId());
 
-        assertThat(savedRequestDto.getId()).isEqualTo(1L);
-        assertThat(savedRequestDto.getDescription()).isEqualTo("description");
-        assertThat(savedRequestDto.getCreated()).isNotNull();
-        assertThat(savedRequestDto.getItems()).isEqualTo(List.of());
+        assertEquals(getRequestDto(), actualRequestDto);
     }
 
     @Test
-    void findAllByRequestor() {
-        when(repository.findAllByRequestorOrderByCreatedDesc(any()))
-                .thenReturn(List.of(request));
+    void getAll_thenFoundRequestDtoListReturned() {
+        when(repository.findAll()).thenReturn(List.of(getRequest()));
 
-        List<RequestDto> requestDtos = service.getAllByRequestorId(requestor.getId());
+        User requestor = getUser();
+        requestor.setId(2L);
+        RequestDto requestDto = getRequestDto();
+        List<RequestDto> requestDtos = service.getAll(requestor.getId(), 0, 10);
 
-        assertThat(requestDtos.size()).isEqualTo(1);
-        assertThat(requestDtos.get(0).getId()).isEqualTo(1L);
-        assertThat(requestDtos.get(0).getDescription()).isEqualTo("description");
-        assertThat(requestDtos.get(0).getCreated()).isNotNull();
-        assertThat(requestDtos.get(0).getItems()).isEqualTo(List.of());
+        assertEquals(1, requestDtos.size());
+        assertEquals(requestDto, requestDtos.get(0));
     }
 
     @Test
-    void findAll() {
-        request.setRequestor(new User(2L, "name2", "email2@email.ru"));
+    void getAllByRequestorId_thenFoundRequestDtoListReturned() {
+        when(repository.findAllByRequestorOrderByCreatedDesc(any())).thenReturn(List.of(getRequest()));
 
-        Page<Request> requests = new PageImpl<>(List.of(request));
+        List<RequestDto> requestDtos = service.getAllByRequestorId(getUser().getId());
 
-        when(repository.findAll(PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "created"))))
-                .thenReturn(requests);
-
-        List<RequestDto> requestDtos = service.getAll(requestor.getId(), 0, 20);
-
-        assertThat(requestDtos.size()).isEqualTo(1);
-        assertThat(requestDtos.get(0).getId()).isEqualTo(1L);
-        assertThat(requestDtos.get(0).getDescription()).isEqualTo("description");
-        assertThat(requestDtos.get(0).getCreated()).isNotNull();
-        assertThat(requestDtos.get(0).getItems()).isEqualTo(List.of());
+        assertEquals(1, requestDtos.size());
+        assertEquals(getRequestDto(), requestDtos.get(0));
     }
 
-    @Test
-    void findById() {
-        when(userService.getByIdWithCheck(any()))
-                .thenReturn(requestor);
-        when(repository.findById(any()))
-                .thenReturn(Optional.of(request));
+    private User getUser() {
+        return new User(1L, "name", "email@email.ru");
+    }
 
-        RequestDto savedRequestDto = service.getById(requestor.getId(), request.getId());
+    private Request getRequest() {
+        return new Request(1L, "description", getUser(), null, null);
+    }
 
-        assertThat(savedRequestDto.getId()).isEqualTo(1L);
-        assertThat(savedRequestDto.getDescription()).isEqualTo("description");
-        assertThat(savedRequestDto.getCreated()).isNotNull();
-        assertThat(savedRequestDto.getItems()).isEqualTo(List.of());
+    private RequestDto getRequestDto() {
+        return new RequestDto(1L, "description", null, List.of());
     }
 }

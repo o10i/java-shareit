@@ -109,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(bookerId, Status.valueOf(state));
                 break;
         }
-        return toListBookingDto(bookings.stream().skip(from).limit(size).collect(Collectors.toList()));
+        return toBookingDtoList(bookings.stream().skip(from).limit(size).collect(Collectors.toList()));
     }
 
     @Override
@@ -135,7 +135,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = repository.findAllByItemOwnerIdAndStatusEqualsOrderByStartDesc(ownerId, Status.valueOf(state));
                 break;
         }
-        return toListBookingDto(bookings.stream().skip(from).limit(size).collect(Collectors.toList()));
+        return toBookingDtoList(bookings.stream().skip(from).limit(size).collect(Collectors.toList()));
     }
 
     private Booking findByIdWithCheck(Long bookingId) {

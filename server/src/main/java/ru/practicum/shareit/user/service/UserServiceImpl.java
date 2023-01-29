@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAll() {
-        return toListUserDto(repository.findAll());
+        return toUserDtoList(repository.findAll());
     }
 
     @Transactional

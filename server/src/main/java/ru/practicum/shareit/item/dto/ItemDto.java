@@ -6,8 +6,7 @@ import lombok.experimental.FieldDefaults;
 import java.util.Set;
 
 @AllArgsConstructor
-@Getter
-@NoArgsConstructor
+@Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemDto {
     Long id;
@@ -19,7 +18,7 @@ public class ItemDto {
     Set<CommentDto> comments;
 
     @AllArgsConstructor
-    @Getter
+    @Data
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public static class BookingDto {
         Long id;

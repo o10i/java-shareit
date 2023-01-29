@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.List;
 
 @AllArgsConstructor
-@Getter
+@Data
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RequestDto {

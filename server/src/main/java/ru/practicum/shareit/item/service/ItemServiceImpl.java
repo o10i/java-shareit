@@ -3,12 +3,11 @@ package ru.practicum.shareit.item.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -117,7 +116,7 @@ public class ItemServiceImpl implements ItemService {
             item.setNextBooking(nextBookings.getOrDefault(item, List.of()).stream().findFirst().orElse(null));
         });
 
-        return toListItemDto(items);
+        return toItemDtoList(items);
     }
 
     @Override
@@ -125,7 +124,7 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank()) {
             return List.of();
         }
-        return toListItemRequestDto(repository.search(text, PageRequest.of(from / size, size)).getContent());
+        return toItemRequestDtoList(repository.search(text).stream().skip(from).limit(size).collect(Collectors.toList()));
     }
 
     @Transactional

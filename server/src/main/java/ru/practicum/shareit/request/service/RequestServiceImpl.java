@@ -3,17 +3,14 @@ package ru.practicum.shareit.request.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.dto.RequestRequestDto;
+import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
@@ -48,17 +45,15 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDto> getAll(Long userId, Integer from, Integer size) {
-        Sort sortByCreated = Sort.by(Sort.Direction.DESC, "created");
-
-        Pageable page = PageRequest.of(from / size, size, sortByCreated);
-
-        List<Request> requests = repository.findAll(page).stream()
+        List<Request> requests = repository.findAll().stream()
                 .filter(request -> !request.getRequestor().getId().equals(userId))
+                .skip(from)
+                .limit(size)
                 .collect(Collectors.toList());
 
         setItems(requests);
 
-        return toListRequestDto(requests);
+        return toRequestDtoList(requests);
     }
 
     @Override
@@ -69,7 +64,7 @@ public class RequestServiceImpl implements RequestService {
 
         setItems(requests);
 
-        return toListRequestDto(requests);
+        return toRequestDtoList(requests);
     }
 
     private Request findByIdWithException(Long requestId) {

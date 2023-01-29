@@ -17,10 +17,10 @@ public final class RequestMapper {
         return new RequestDto(request.getId(),
                 request.getDescription(),
                 request.getCreated(),
-                request.getItems() == null ? List.of() : ItemMapper.toListItemRequestDto(request.getItems()));
+                request.getItems() == null ? List.of() : ItemMapper.toItemRequestDtoList(request.getItems()));
     }
 
-    public static List<RequestDto> toListRequestDto(List<Request> requests) {
+    public static List<RequestDto> toRequestDtoList(List<Request> requests) {
         return requests.stream().map(RequestMapper::toRequestDto).collect(Collectors.toList());
     }
 

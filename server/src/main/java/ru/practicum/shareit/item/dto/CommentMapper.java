@@ -19,7 +19,7 @@ public final class CommentMapper {
         );
     }
 
-    public static Set<CommentDto> toListCommentDto(Set<Comment> comments) {
+    public static Set<CommentDto> toCommentDtoList(Set<Comment> comments) {
         return comments.stream().map(CommentMapper::toCommentDto).collect(Collectors.toSet());
     }
 
