@@ -1,12 +1,14 @@
 package ru.practicum.shareit.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -27,14 +29,15 @@ class UserControllerTest {
             "user",
             "user@user.com");
     @Autowired
+    MockMvc mvc;
+    @Autowired
     ObjectMapper mapper;
     @MockBean
     UserService service;
-    @Autowired
-    MockMvc mvc;
 
+    @SneakyThrows
     @Test
-    void save() throws Exception {
+    void save() {
         when(service.save(any()))
                 .thenReturn(userDto);
 
@@ -49,8 +52,9 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
     }
 
+    @SneakyThrows
     @Test
-    void update() throws Exception {
+    void update() {
         UserDto updatedUserDto = new UserDto(1L,"updated","user@user.com");
 
         when(service.update(any(), any()))
@@ -67,8 +71,9 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email", is(updatedUserDto.getEmail())));
     }
 
+    @SneakyThrows
     @Test
-    void findById() throws Exception {
+    void getById() {
         when(service.getByid(any()))
                 .thenReturn(userDto);
 
@@ -79,8 +84,9 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
     }
 
+    @SneakyThrows
     @Test
-    void findByIdWithException() throws Exception {
+    void getByIdWithException() {
         when(service.getByid(any()))
                 .thenThrow(NotFoundException.class);
 
@@ -88,8 +94,9 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @SneakyThrows
     @Test
-    void findAll() throws Exception {
+    void getAll() {
         when(service.getAll())
                 .thenReturn(List.of(userDto));
 
@@ -100,9 +107,10 @@ class UserControllerTest {
                 .andExpect(jsonPath("$[0].email", is(userDto.getEmail())));
     }
 
+    @SneakyThrows
     @Test
-    void deleteById() throws Exception {
-        mvc.perform(delete("/users/{id}", userDto.getId()))
+    void delete() {
+        mvc.perform(MockMvcRequestBuilders.delete("/users/{id}", userDto.getId()))
                 .andExpect(status().isOk());
     }
 }

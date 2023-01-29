@@ -36,13 +36,15 @@ class UserServiceImplTest {
     }
 
     @Test
-    void update() {
-/*        when(repository.findById(anyLong())).thenReturn(Optional.of(user));
+    void update_thenUpdateUser() {
+        User user = new User(0L, "name", "email@email.ru");
+        UserDto userDto = new UserDto(0L, "name", "email@email.ru");
+        when(repository.findById(anyLong())).thenReturn(Optional.of(user));
         userDto.setName("nameUpdated");
 
         UserDto actualUserDto = service.update(user.getId(), userDto);
 
-        assertEquals(actualUserDto, userDto);*/
+        assertEquals(actualUserDto, userDto);
     }
 
     @Test

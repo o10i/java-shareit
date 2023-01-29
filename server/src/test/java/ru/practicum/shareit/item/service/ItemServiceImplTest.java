@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageImpl;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
@@ -82,6 +83,8 @@ class ItemServiceImplTest {
         assertThat(updatedItem.getName()).isEqualTo("nameUpdated");
         assertThat(updatedItem.getDescription()).isEqualTo("itemDescription");
         assertThat(updatedItem.getAvailable()).isEqualTo(true);
+
+        assertThrows(ForbiddenException.class, () -> service.update(2L, 2L, itemRequestDto));
     }
 
     @Test
@@ -99,24 +102,24 @@ class ItemServiceImplTest {
         assertThat(foundItemDto.getAvailable()).isEqualTo(true);
     }
 
-/*    @Test
+    @Test
     void findAllByOwnerId() {
         when(userService.findByIdWithCheck(anyLong()))
                 .thenReturn(user);
 
-        Page<Item> items = new PageImpl<>(List.of(item));
+        List<Item> items = List.of(item);
 
-        when(repository.findAllByOwnerIdOrderById(anyLong(), any()))
+        when(repository.findAllByOwnerIdOrderById(anyLong()))
                 .thenReturn(items);
 
-        List<ItemDto> itemDtoList = service.getAllByOwner(1L, 0, 20);
+        List<ItemDto> itemDtoList = service.getAllByOwnerId(1L, 0, 10);
 
         assertThat(itemDtoList.size()).isEqualTo(1);
         assertThat(itemDtoList.get(0).getId()).isEqualTo(1L);
         assertThat(itemDtoList.get(0).getName()).isEqualTo("itemName");
         assertThat(itemDtoList.get(0).getDescription()).isEqualTo("itemDescription");
         assertThat(itemDtoList.get(0).getAvailable()).isEqualTo(true);
-    }*/
+    }
 
     @Test
     void search() {
