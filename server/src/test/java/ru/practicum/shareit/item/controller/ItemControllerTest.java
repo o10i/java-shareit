@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -58,8 +59,9 @@ class ItemControllerTest {
     @Autowired
     MockMvc mvc;
 
+    @SneakyThrows
     @Test
-    void save() throws Exception {
+    void save() {
         when(service.save(any(), any()))
                 .thenReturn(itemRequestDto);
 
@@ -76,8 +78,9 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.available", is(itemRequestDto.getAvailable())));
     }
 
+    @SneakyThrows
     @Test
-    void save_thenBadRequest() throws Exception {
+    void save_thenBadRequest() {
         when(service.save(any(), any()))
                 .thenThrow(BadRequestException.class);
 
@@ -90,8 +93,9 @@ class ItemControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @SneakyThrows
     @Test
-    void update() throws Exception {
+    void update() {
         itemRequestDto.setName("updated");
         when(service.update(any(), any(), any()))
                 .thenReturn(itemRequestDto);
@@ -109,8 +113,9 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.available", is(itemRequestDto.getAvailable())));
     }
 
+    @SneakyThrows
     @Test
-    void update_thenForbidden() throws Exception {
+    void update_thenForbidden() {
         itemRequestDto.setName("updated");
         when(service.update(any(), any(), any()))
                 .thenThrow(ForbiddenException.class);
@@ -124,8 +129,9 @@ class ItemControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    @SneakyThrows
     @Test
-    void findById() throws Exception {
+    void getById() {
         when(service.getById(any(), any()))
                 .thenReturn(itemDto);
 
@@ -138,8 +144,9 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.available", is(itemDto.getAvailable())));
     }
 
+    @SneakyThrows
     @Test
-    void findByIdWithException() throws Exception {
+    void getByIdWithException() {
         when(service.getById(any(), any()))
                 .thenThrow(NotFoundException.class);
 
@@ -148,8 +155,9 @@ class ItemControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @SneakyThrows
     @Test
-    void findAllByOwnerId() throws Exception {
+    void getAllByOwnerId() {
         when(service.getAllByOwnerId(any(), any(), any()))
                 .thenReturn(List.of(itemDto));
 
@@ -163,8 +171,9 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$[0].available", is(itemDto.getAvailable())));
     }
 
+    @SneakyThrows
     @Test
-    void search() throws Exception {
+    void search() {
         when(service.search(any(), any(), any()))
                 .thenReturn(List.of(itemRequestDto));
 
@@ -178,8 +187,9 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$[0].available", is(itemDto.getAvailable())));
     }
 
+    @SneakyThrows
     @Test
-    void saveComment() throws Exception {
+    void saveComment() {
         when(service.saveComment(any(), any(), any()))
                 .thenReturn(commentDto);
 

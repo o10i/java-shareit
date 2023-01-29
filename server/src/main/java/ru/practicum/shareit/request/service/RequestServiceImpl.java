@@ -37,7 +37,7 @@ public class RequestServiceImpl implements RequestService {
     public RequestDto getById(Long userId, Long requestId) {
         userService.getByIdWithCheck(userId);
 
-        Request request = findByIdWithException(requestId);
+        Request request = getByIdWithCheck(requestId);
         request.setItems(itemRepository.findAllByRequestId(requestId));
 
         return toRequestDto(request);
@@ -67,7 +67,7 @@ public class RequestServiceImpl implements RequestService {
         return toRequestDtoList(requests);
     }
 
-    private Request findByIdWithException(Long requestId) {
+    private Request getByIdWithCheck(Long requestId) {
         return repository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException(String.format("Request with id=%d not found", requestId)));
     }

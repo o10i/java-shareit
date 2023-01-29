@@ -7,8 +7,7 @@ import ru.practicum.shareit.booking.enums.Status;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingDto {
@@ -20,14 +19,14 @@ public class BookingDto {
     Item item;
 
     @AllArgsConstructor
-    @Getter
+    @Data
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public static class User {
         Long id;
     }
 
     @AllArgsConstructor
-    @Getter
+    @Data
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public static class Item {
         Long id;

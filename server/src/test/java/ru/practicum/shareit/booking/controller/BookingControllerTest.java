@@ -85,7 +85,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void findById() throws Exception {
+    void getById() throws Exception {
         when(service.getById(any(), any()))
                 .thenReturn(bookingDto);
 
@@ -102,7 +102,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void findByIdWithException() throws Exception {
+    void getByIdWithException() throws Exception {
         when(service.getById(any(), any()))
                 .thenThrow(NotFoundException.class);
 

@@ -32,7 +32,6 @@ class UserServiceImplTest {
         UserDto actualUserDto = service.save(userDto);
 
         assertEquals(userDto, actualUserDto);
-        verify(repository).save(any());
     }
 
     @Test

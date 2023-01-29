@@ -94,7 +94,7 @@ class RequestControllerTest {
     }
 
     @Test
-    void findById() throws Exception {
+    void getById() throws Exception {
         when(service.getById(any(), any()))
                 .thenReturn(requestDto);
 

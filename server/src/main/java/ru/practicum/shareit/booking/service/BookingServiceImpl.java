@@ -54,28 +54,11 @@ public class BookingServiceImpl implements BookingService {
         return toBookingDto(repository.save(toBooking(bookingRequestDto, item, booker)));
     }
 
-    @Transactional
-    @Override
-    public BookingDto approve(Long ownerId, Long bookingId, Boolean approved) {
-        userService.getByIdWithCheck(ownerId);
-
-        Booking booking = findByIdWithCheck(bookingId);
-        Long trueOwnerId = booking.getItem().getOwnerId();
-        if (!ownerId.equals(trueOwnerId)) {
-            throw new NotFoundException(String.format("ownerId=%d not equal to true ownerId=%d", ownerId, trueOwnerId));
-        }
-        if (!booking.getStatus().equals(Status.WAITING)) {
-            throw new BadRequestException(String.format("Booking with id=%d hasn't WAITING status.", booking.getId()));
-        }
-        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
-        return toBookingDto(booking);
-    }
-
     @Override
     public BookingDto getById(Long userId, Long bookingId) {
         userService.getByIdWithCheck(userId);
 
-        Booking booking = findByIdWithCheck(bookingId);
+        Booking booking = getByIdWithCheck(bookingId);
 
         Long bookerId = booking.getBooker().getId();
         Long ownerId = booking.getItem().getOwnerId();
@@ -138,7 +121,24 @@ public class BookingServiceImpl implements BookingService {
         return toBookingDtoList(bookings.stream().skip(from).limit(size).collect(Collectors.toList()));
     }
 
-    private Booking findByIdWithCheck(Long bookingId) {
+    @Transactional
+    @Override
+    public BookingDto approve(Long ownerId, Long bookingId, Boolean approved) {
+        userService.getByIdWithCheck(ownerId);
+
+        Booking booking = getByIdWithCheck(bookingId);
+        Long trueOwnerId = booking.getItem().getOwnerId();
+        if (!ownerId.equals(trueOwnerId)) {
+            throw new NotFoundException(String.format("ownerId=%d not equal to true ownerId=%d", ownerId, trueOwnerId));
+        }
+        if (!booking.getStatus().equals(Status.WAITING)) {
+            throw new BadRequestException(String.format("Booking with id=%d hasn't WAITING status.", booking.getId()));
+        }
+        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
+        return toBookingDto(booking);
+    }
+
+    private Booking getByIdWithCheck(Long bookingId) {
         return repository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException(String.format("Booking with id=%d not found", bookingId)));
     }
