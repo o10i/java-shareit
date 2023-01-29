@@ -37,30 +37,30 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllByBookerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> getAllByBookerId(@RequestHeader("X-Sharer-User-Id") Long bookerId,
                                                    @RequestParam(name = "state", defaultValue = "all") String stateParam,
                                                    @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                                    @Positive @RequestParam(defaultValue = "10") Integer size) {
         BookingState state = BookingState.getBookingState(stateParam);
-        log.info("Get bookings by booker with state {}, userId={}, from={}, size={}", state, userId, from, size);
-        return bookingClient.getAllByBookerId(userId, state, from, size);
+        log.info("Get bookings by booker with state {}, bookerId={}, from={}, size={}", state, bookerId, from, size);
+        return bookingClient.getAllByBookerId(bookerId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<Object> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                                                   @RequestParam(name = "state", defaultValue = "all") String stateParam,
                                                   @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                                   @Positive @RequestParam(defaultValue = "10") Integer size) {
         BookingState state = BookingState.getBookingState(stateParam);
-        log.info("Get bookings by owner with state {}, userId={}, from={}, size={}", state, userId, from, size);
-        return bookingClient.getAllByOwnerId(userId, state, from, size);
+        log.info("Get bookings by owner with state {}, ownerId={}, from={}, size={}", state, ownerId, from, size);
+        return bookingClient.getAllByOwnerId(ownerId, state, from, size);
     }
 
     @PatchMapping("/{bookingId}")
-    public ResponseEntity<Object> approve(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> approve(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                                           @PathVariable Long bookingId,
                                           @RequestParam Boolean approved) {
-        log.info("Approve bookingId={}, userId={}", bookingId, userId);
-        return bookingClient.approve(userId, bookingId, approved);
+        log.info("Approve bookingId={}, ownerId={}", bookingId, ownerId);
+        return bookingClient.approve(ownerId, bookingId, approved);
     }
 }

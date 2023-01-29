@@ -30,10 +30,10 @@ public class ItemController {
     }
 
     @GetMapping()
-    public List<ItemDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public List<ItemDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                                          @RequestParam(defaultValue = "0") Integer from,
                                          @RequestParam(defaultValue = "10") Integer size) {
-        return service.getAllByOwnerId(userId, from, size);
+        return service.getAllByOwnerId(ownerId, from, size);
     }
 
     @PatchMapping("/{itemId}")
@@ -51,9 +51,9 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto saveComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public CommentDto saveComment(@RequestHeader("X-Sharer-User-Id") Long authorId,
                                   @PathVariable Long itemId,
                                   @RequestBody CommentDto commentDto) {
-        return service.saveComment(userId, itemId, toComment(commentDto));
+        return service.saveComment(authorId, itemId, toComment(commentDto));
     }
 }

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingRequestDto {
-    long itemId;
+    Long itemId;
     @FutureOrPresent LocalDateTime start;
     @Future LocalDateTime end;
 }

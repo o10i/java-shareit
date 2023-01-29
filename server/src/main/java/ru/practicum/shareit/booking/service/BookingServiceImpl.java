@@ -56,12 +56,13 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingDto approve(Long userId, Long bookingId, Boolean approved) {
-        userService.getByIdWithCheck(userId);
+    public BookingDto approve(Long ownerId, Long bookingId, Boolean approved) {
+        userService.getByIdWithCheck(ownerId);
 
         Booking booking = findByIdWithCheck(bookingId);
-        if (!userId.equals(booking.getItem().getOwnerId())) {
-            throw new NotFoundException(String.format("userId=%d not equal to ownerId=%d", userId, booking.getItem().getOwnerId()));
+        Long trueOwnerId = booking.getItem().getOwnerId();
+        if (!ownerId.equals(trueOwnerId)) {
+            throw new NotFoundException(String.format("ownerId=%d not equal to true ownerId=%d", ownerId, trueOwnerId));
         }
         if (!booking.getStatus().equals(Status.WAITING)) {
             throw new BadRequestException(String.format("Booking with id=%d hasn't WAITING status.", booking.getId()));
@@ -86,52 +87,52 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllByBookerId(Long userId, String state, Integer from, Integer size) {
-        userService.getByIdWithCheck(userId);
+    public List<BookingDto> getAllByBookerId(Long bookerId, String state, Integer from, Integer size) {
+        userService.getByIdWithCheck(bookerId);
 
         List<Booking> bookings = List.of();
         switch (state) {
             case "ALL":
-                bookings = repository.findAllByBookerIdOrderByStartDesc(userId);
+                bookings = repository.findAllByBookerIdOrderByStartDesc(bookerId);
                 break;
             case "CURRENT":
-                bookings = repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now());
+                bookings = repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId, LocalDateTime.now(), LocalDateTime.now());
                 break;
             case "PAST":
-                bookings = repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now());
                 break;
             case "FUTURE":
-                bookings = repository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = repository.findAllByBookerIdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now());
                 break;
             case "WAITING":
             case "REJECTED":
-                bookings = repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(state));
+                bookings = repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(bookerId, Status.valueOf(state));
                 break;
         }
         return toListBookingDto(bookings.stream().skip(from).limit(size).collect(Collectors.toList()));
     }
 
     @Override
-    public List<BookingDto> getAllByOwnerId(Long userId, String state, Integer from, Integer size) {
-        userService.getByIdWithCheck(userId);
+    public List<BookingDto> getAllByOwnerId(Long ownerId, String state, Integer from, Integer size) {
+        userService.getByIdWithCheck(ownerId);
 
         List<Booking> bookings = List.of();
         switch (state) {
             case "ALL":
-                bookings = repository.findAllByItemOwnerIdOrderByStartDesc(userId);
+                bookings = repository.findAllByItemOwnerIdOrderByStartDesc(ownerId);
                 break;
             case "CURRENT":
-                bookings = repository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now());
+                bookings = repository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now());
                 break;
             case "PAST":
-                bookings = repository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = repository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now());
                 break;
             case "FUTURE":
-                bookings = repository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = repository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now());
                 break;
             case "WAITING":
             case "REJECTED":
-                bookings = repository.findAllByItemOwnerIdAndStatusEqualsOrderByStartDesc(userId, Status.valueOf(state));
+                bookings = repository.findAllByItemOwnerIdAndStatusEqualsOrderByStartDesc(ownerId, Status.valueOf(state));
                 break;
         }
         return toListBookingDto(bookings.stream().skip(from).limit(size).collect(Collectors.toList()));

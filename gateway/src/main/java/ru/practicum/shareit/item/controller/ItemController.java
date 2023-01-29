@@ -37,11 +37,11 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                                                   @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                   @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        log.info("Get items by owner, userId={}, from={}, size={}", userId, from, size);
-        return itemClient.getAllByOwnerId(userId, from, size);
+        log.info("Get items by owner, ownerId={}, from={}, size={}", ownerId, from, size);
+        return itemClient.getAllByOwnerId(ownerId, from, size);
     }
 
     @PatchMapping("/{itemId}")
@@ -61,10 +61,10 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> saveComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> saveComment(@RequestHeader("X-Sharer-User-Id") Long authorId,
                                               @PathVariable Long itemId,
                                               @RequestBody @Valid CommentDto commentDto) {
-        log.info("Create comment, itemId={}, userId={}", itemId, userId);
-        return itemClient.saveComment(userId, itemId, commentDto);
+        log.info("Create comment, itemId={}, authorId={}", itemId, authorId);
+        return itemClient.saveComment(authorId, itemId, commentDto);
     }
 }

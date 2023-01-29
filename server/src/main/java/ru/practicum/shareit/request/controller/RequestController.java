@@ -15,9 +15,9 @@ public class RequestController {
     private final RequestService service;
 
     @PostMapping()
-    public RequestDto save(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public RequestDto save(@RequestHeader("X-Sharer-User-Id") Long requestorId,
                            @RequestBody RequestRequestDto requestRequestDto) {
-        return service.save(userId, requestRequestDto);
+        return service.save(requestorId, requestRequestDto);
     }
 
     @GetMapping("/{requestId}")
@@ -34,7 +34,7 @@ public class RequestController {
     }
 
     @GetMapping()
-    public List<RequestDto> getAllByRequestorId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return service.getAllByRequestorId(userId);
+    public List<RequestDto> getAllByRequestorId(@RequestHeader("X-Sharer-User-Id") Long requestorId) {
+        return service.getAllByRequestorId(requestorId);
     }
 }

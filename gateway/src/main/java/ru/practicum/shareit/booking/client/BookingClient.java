@@ -23,25 +23,25 @@ public class BookingClient extends BaseClient {
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new).build());
     }
 
-    public ResponseEntity<Object> save(long userId, BookingRequestDto requestDto) {
+    public ResponseEntity<Object> save(Long userId, BookingRequestDto requestDto) {
         return post("", userId, requestDto);
     }
 
-    public ResponseEntity<Object> getById(long userId, long bookingId) {
+    public ResponseEntity<Object> getById(Long userId, Long bookingId) {
         return get("/" + bookingId, userId);
     }
 
-    public ResponseEntity<Object> getAllByBookerId(long userId, BookingState state, Integer from, Integer size) {
+    public ResponseEntity<Object> getAllByBookerId(Long userId, BookingState state, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of("state", state.name(), "from", from, "size", size);
         return get("?state={state}&from={from}&size={size}", userId, parameters);
     }
 
-    public ResponseEntity<Object> getAllByOwnerId(long userId, BookingState state, Integer from, Integer size) {
+    public ResponseEntity<Object> getAllByOwnerId(Long userId, BookingState state, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of("state", state.name(), "from", from, "size", size);
         return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
     }
 
-    public ResponseEntity<Object> approve(long userId, long bookingId, Boolean approved) {
+    public ResponseEntity<Object> approve(Long userId, Long bookingId, Boolean approved) {
         return patch("/" + bookingId + "?approved=" + approved, userId);
     }
 }

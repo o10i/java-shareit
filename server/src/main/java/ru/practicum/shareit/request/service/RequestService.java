@@ -8,9 +8,9 @@ import java.util.List;
 public interface RequestService {
     RequestDto save(Long requestorId, RequestRequestDto requestRequestDto);
 
-    List<RequestDto> getAllByRequestorId(Long userId);
+    RequestDto getById(Long userId, Long requestId);
 
     List<RequestDto> getAll(Long userId, Integer from, Integer size);
 
-    RequestDto getById(Long userId, Long requestId);
+    List<RequestDto> getAllByRequestorId(Long requestorId);
 }

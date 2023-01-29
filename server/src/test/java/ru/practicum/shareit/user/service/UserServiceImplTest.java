@@ -49,7 +49,7 @@ class UserServiceImplTest {
 
     @Test
     void findById_whenUserFound_thenReturnedUser() {
-        long userId = 0L;
+        Long userId = 0L;
         User user = new User();
         UserDto expectedUserDto = new UserDto();
         when(repository.findById(userId)).thenReturn(Optional.of(user));
@@ -61,7 +61,7 @@ class UserServiceImplTest {
 
     @Test
     void findById_whenUserFound_thenNotFoundExceptionThrown() {
-        long userId = 0L;
+        Long userId = 0L;
         when(repository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> service.getByid(userId));

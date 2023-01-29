@@ -22,20 +22,20 @@ public class RequestClient extends BaseClient {
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new).build());
     }
 
-    public ResponseEntity<Object> save(long userId, RequestRequestDto requestDto) {
-        return post("", userId, requestDto);
+    public ResponseEntity<Object> save(Long requestorId, RequestRequestDto requestDto) {
+        return post("", requestorId, requestDto);
     }
 
-    public ResponseEntity<Object> getById(long userId, long requestId) {
+    public ResponseEntity<Object> getById(Long userId, Long requestId) {
         return get("/" + requestId, userId);
     }
 
-    public ResponseEntity<Object> getAll(long userId, Integer from, Integer size) {
+    public ResponseEntity<Object> getAll(Long userId, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of("from", from, "size", size);
         return get("/all?from={from}&size={size}", userId, parameters);
     }
 
-    public ResponseEntity<Object> getAllByRequestorId(long userId) {
-        return get("", userId);
+    public ResponseEntity<Object> getAllByRequestorId(Long requestorId) {
+        return get("", requestorId);
     }
 }

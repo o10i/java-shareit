@@ -22,10 +22,10 @@ public class RequestController {
     private final RequestClient requestClient;
 
     @PostMapping
-    public ResponseEntity<Object> save(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> save(@RequestHeader("X-Sharer-User-Id") Long requestorId,
                                        @RequestBody @Valid RequestRequestDto requestDto) {
-        log.info("Create request {}, userId={}", requestDto, userId);
-        return requestClient.save(userId, requestDto);
+        log.info("Create request {}, requestorId={}", requestDto, requestorId);
+        return requestClient.save(requestorId, requestDto);
     }
 
     @GetMapping("/{requestId}")
@@ -44,8 +44,8 @@ public class RequestController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllByRequestorId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("Get requests by requestor with userId={}", userId);
-        return requestClient.getAllByRequestorId(userId);
+    public ResponseEntity<Object> getAllByRequestorId(@RequestHeader("X-Sharer-User-Id") Long requestorId) {
+        log.info("Get requests by requestor with requestorId={}", requestorId);
+        return requestClient.getAllByRequestorId(requestorId);
     }
 }

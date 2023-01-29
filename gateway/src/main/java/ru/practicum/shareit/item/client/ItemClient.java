@@ -23,20 +23,20 @@ public class ItemClient extends BaseClient {
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new).build());
     }
 
-    public ResponseEntity<Object> save(long userId, ItemRequestDto requestDto) {
+    public ResponseEntity<Object> save(Long userId, ItemRequestDto requestDto) {
         return post("", userId, requestDto);
     }
 
-    public ResponseEntity<Object> getById(long userId, long itemId) {
+    public ResponseEntity<Object> getById(Long userId, Long itemId) {
         return get("/" + itemId, userId);
     }
 
-    public ResponseEntity<Object> getAllByOwnerId(long userId, Integer from, Integer size) {
+    public ResponseEntity<Object> getAllByOwnerId(Long ownerId, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of("from", from, "size", size);
-        return get("?from={from}&size={size}", userId, parameters);
+        return get("?from={from}&size={size}", ownerId, parameters);
     }
 
-    public ResponseEntity<Object> update(long userId, long itemId, ItemRequestDto requestDto) {
+    public ResponseEntity<Object> update(Long userId, Long itemId, ItemRequestDto requestDto) {
         return patch("/" + itemId, userId, requestDto);
     }
 
@@ -45,8 +45,8 @@ public class ItemClient extends BaseClient {
         return get("/search?text={text}&from={from}&size={size}", null, parameters);
     }
 
-    public ResponseEntity<Object> saveComment(long userId, Long itemId, CommentDto commentDto) {
-        return post("/" + itemId + "/comment", userId, commentDto);
+    public ResponseEntity<Object> saveComment(Long authorId, Long itemId, CommentDto commentDto) {
+        return post("/" + itemId + "/comment", authorId, commentDto);
     }
 
 }

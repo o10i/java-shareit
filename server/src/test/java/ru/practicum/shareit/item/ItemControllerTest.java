@@ -47,7 +47,7 @@ class ItemControllerTest {
 
     private final CommentDto commentDto = new CommentDto(
             1L,
-            "Add comment from user1",
+            "comment from user1",
             "authorName",
             LocalDateTime.now()
     );

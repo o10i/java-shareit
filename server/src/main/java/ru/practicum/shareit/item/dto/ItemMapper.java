@@ -43,13 +43,13 @@ public final class ItemMapper {
         return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
-    public static Item toItem(ItemRequestDto itemRequestDto, Long ownerId) {
+    public static Item toItem(ItemRequestDto itemRequestDto, Long userId) {
         Item item = new Item();
         item.setName(itemRequestDto.getName());
         item.setDescription(itemRequestDto.getDescription());
         item.setAvailable(itemRequestDto.getAvailable());
         item.setRequestId(itemRequestDto.getRequestId());
-        item.setOwnerId(ownerId);
+        item.setOwnerId(userId);
         return item;
     }
 }

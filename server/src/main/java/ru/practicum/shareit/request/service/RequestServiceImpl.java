@@ -37,14 +37,13 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<RequestDto> getAllByRequestorId(Long requestorId) {
-        User requestor = userService.getByIdWithCheck(requestorId);
+    public RequestDto getById(Long userId, Long requestId) {
+        userService.getByIdWithCheck(userId);
 
-        List<Request> requests = repository.findAllByRequestorOrderByCreatedDesc(requestor);
+        Request request = findByIdWithException(requestId);
+        request.setItems(itemRepository.findAllByRequestId(requestId));
 
-        setItems(requests);
-
-        return toListRequestDto(requests);
+        return toRequestDto(request);
     }
 
     @Override
@@ -63,13 +62,14 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public RequestDto getById(Long userId, Long requestId) {
-        userService.getByIdWithCheck(userId);
+    public List<RequestDto> getAllByRequestorId(Long requestorId) {
+        User requestor = userService.getByIdWithCheck(requestorId);
 
-        Request request = findByIdWithException(requestId);
-        request.setItems(itemRepository.findAllByRequestId(requestId));
+        List<Request> requests = repository.findAllByRequestorOrderByCreatedDesc(requestor);
 
-        return toRequestDto(request);
+        setItems(requests);
+
+        return toListRequestDto(requests);
     }
 
     private Request findByIdWithException(Long requestId) {

@@ -91,10 +91,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getAllByOwnerId(Long userId, Integer from, Integer size) {
-        userService.getByIdWithCheck(userId);
+    public List<ItemDto> getAllByOwnerId(Long ownerId, Integer from, Integer size) {
+        userService.getByIdWithCheck(ownerId);
 
-        List<Item> items = repository.findAllByOwnerIdOrderById(userId)
+        List<Item> items = repository.findAllByOwnerIdOrderById(ownerId)
                 .stream().skip(from).limit(size).collect(Collectors.toList());
 
         Map<Item, Set<Comment>> comments = commentRepository.findAllByItemIn(items)
@@ -130,14 +130,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public CommentDto saveComment(Long userId, Long itemId, Comment comment) {
-        User author = userService.getByIdWithCheck(userId);
+    public CommentDto saveComment(Long authorId, Long itemId, Comment comment) {
+        User author = userService.getByIdWithCheck(authorId);
         Item item = getByIdWithCheck(itemId);
 
         if (bookingRepository.findAllByBookerIdAndItemIdAndEndBeforeAndStatusEquals(
-                userId, itemId, LocalDateTime.now(), Status.APPROVED).isEmpty()) {
+                authorId, itemId, LocalDateTime.now(), Status.APPROVED).isEmpty()) {
             throw new BadRequestException(
-                    String.format("userId=%d hasn't booking for itemId=%d in past.", userId, itemId));
+                    String.format("userId=%d hasn't booking for itemId=%d in past.", authorId, itemId));
         }
 
         comment.setItem(item);
