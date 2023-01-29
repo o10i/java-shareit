@@ -13,6 +13,5 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RequestRequestDto {
-	@NotBlank
-	private String description;
+    @NotBlank String description;
 }

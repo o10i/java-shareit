@@ -20,7 +20,7 @@ import ru.practicum.shareit.user.service.UserServiceImpl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.request.RequestMapper.*;
+import static ru.practicum.shareit.request.dto.RequestMapper.*;
 
 @Service
 @RequiredArgsConstructor

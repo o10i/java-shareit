@@ -5,12 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDto;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.util.List;
 
-import static ru.practicum.shareit.user.UserMapper.*;
+import static ru.practicum.shareit.user.dto.UserMapper.*;
 
 @Transactional(readOnly = true)
 @Service

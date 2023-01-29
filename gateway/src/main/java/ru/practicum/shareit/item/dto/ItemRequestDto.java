@@ -9,17 +9,14 @@ import lombok.experimental.FieldDefaults;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+@AllArgsConstructor
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemRequestDto {
-	Long id;
-	@NotBlank
-	String name;
-	@NotBlank
-	String description;
-	@NotNull
-	Boolean available;
-	Long requestId;
+    Long id;
+    @NotBlank String name;
+    @NotBlank String description;
+    @NotNull Boolean available;
+    Long requestId;
 }

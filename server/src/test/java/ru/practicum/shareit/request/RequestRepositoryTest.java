@@ -11,7 +11,7 @@ import ru.practicum.shareit.user.UserRepository;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static ru.practicum.shareit.request.RequestMapper.toRequest;
+import static ru.practicum.shareit.request.dto.RequestMapper.toRequest;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)

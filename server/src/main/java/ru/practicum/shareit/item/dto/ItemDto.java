@@ -1,14 +1,13 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Set;
 
-@Data
 @AllArgsConstructor
+@Getter
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemDto {
     Long id;
@@ -19,7 +18,8 @@ public class ItemDto {
     BookingDto nextBooking;
     Set<CommentDto> comments;
 
-    @Data
+    @AllArgsConstructor
+    @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public static class BookingDto {
         Long id;

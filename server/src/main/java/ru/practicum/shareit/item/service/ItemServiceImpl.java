@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
-import static ru.practicum.shareit.item.mapper.CommentMapper.toCommentDto;
-import static ru.practicum.shareit.item.mapper.ItemMapper.*;
+import static ru.practicum.shareit.item.dto.CommentMapper.toCommentDto;
+import static ru.practicum.shareit.item.dto.ItemMapper.*;
 
 @Transactional(readOnly = true)
 @Service
@@ -54,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemRequestDto update(Long userId, Long itemId, ItemRequestDto itemRequestDto) {
         userService.getByIdWithCheck(userId);
 
-        Item itemToUpdate = findByIdWithCheck(itemId);
+        Item itemToUpdate = getByIdWithCheck(itemId);
 
         if (!userId.equals(itemToUpdate.getOwnerId())) {
             throw new ForbiddenException(
@@ -77,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto getById(Long userId, Long itemId) {
         userService.getByIdWithCheck(userId);
 
-        Item item = findByIdWithCheck(itemId);
+        Item item = getByIdWithCheck(itemId);
         item.setComments(commentRepository.findAllByItemId(itemId));
 
         if (userId.equals(item.getOwnerId())) {
@@ -132,7 +132,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentDto saveComment(Long userId, Long itemId, Comment comment) {
         User author = userService.getByIdWithCheck(userId);
-        Item item = findByIdWithCheck(itemId);
+        Item item = getByIdWithCheck(itemId);
 
         if (bookingRepository.findAllByBookerIdAndItemIdAndEndBeforeAndStatusEquals(
                 userId, itemId, LocalDateTime.now(), Status.APPROVED).isEmpty()) {
@@ -146,7 +146,7 @@ public class ItemServiceImpl implements ItemService {
         return toCommentDto(commentRepository.save(comment));
     }
 
-    public Item findByIdWithCheck(Long itemId) {
+    public Item getByIdWithCheck(Long itemId) {
         return repository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format("Item with id=%d not found", itemId)));
     }

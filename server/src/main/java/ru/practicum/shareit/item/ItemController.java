@@ -9,7 +9,7 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
 
-import static ru.practicum.shareit.item.mapper.CommentMapper.toComment;
+import static ru.practicum.shareit.item.dto.CommentMapper.toComment;
 
 @RestController
 @RequiredArgsConstructor

@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.BookingMapper.*;
+import static ru.practicum.shareit.booking.dto.BookingMapper.*;
 
 @Transactional(readOnly = true)
 @Service
@@ -42,7 +42,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException(String.format("start=%s or end=%s has invalid value.", start, end));
         }
 
-        Item item = itemService.findByIdWithCheck(bookingRequestDto.getItemId());
+        Item item = itemService.getByIdWithCheck(bookingRequestDto.getItemId());
         if (userId.equals(item.getOwnerId())) {
             throw new NotFoundException(String.format("userId=%d equals ownerId=%d.", userId, item.getOwnerId()));
         }

@@ -52,12 +52,9 @@ class BookingServiceImplTest {
 
     @Test
     void save() {
-        when(itemService.findByIdWithCheck(anyLong()))
-                .thenReturn(item);
-        when(userService.getByIdWithCheck(anyLong()))
-                .thenReturn(user);
-        when(repository.save(any()))
-                .thenReturn(booking);
+        when(itemService.getByIdWithCheck(anyLong())).thenReturn(item);
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(user);
+        when(repository.save(any())).thenReturn(booking);
 
         BookingDto savedBookingDto = service.save(2L, bookingRequestDto);
 
@@ -80,10 +77,8 @@ class BookingServiceImplTest {
 
     @Test
     void approve() {
-        when(userService.getByIdWithCheck(anyLong()))
-                .thenReturn(user);
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.of(booking));
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(user);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(booking));
 
         BookingDto approvedBookingDto = service.approve(1L, booking.getId(), true);
 
@@ -97,10 +92,8 @@ class BookingServiceImplTest {
 
     @Test
     void findById() {
-        when(userService.getByIdWithCheck(anyLong()))
-                .thenReturn(user);
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.of(booking));
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(user);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(booking));
 
         BookingDto foundBookingDto = service.getById(1L, booking.getId());
 
@@ -116,21 +109,15 @@ class BookingServiceImplTest {
 
     @Test
     void findAllByBookerId() {
-        when(userService.getByIdWithCheck(anyLong()))
-                .thenReturn(user);
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(user);
 
         List<Booking> bookings = List.of(booking);
 
-        when(repository.findAllByBookerIdOrderByStartDesc(anyLong()))
-                .thenReturn(bookings);
-        when(repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(), any()))
-                .thenReturn(bookings);
-        when(repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(anyLong(), any()))
-                .thenReturn(bookings);
-        when(repository.findAllByBookerIdAndStartAfterOrderByStartDesc(anyLong(), any()))
-                .thenReturn(bookings);
-        when(repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(anyLong(), any()))
-                .thenReturn(bookings);
+        when(repository.findAllByBookerIdOrderByStartDesc(anyLong())).thenReturn(bookings);
+        when(repository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(), any())).thenReturn(bookings);
+        when(repository.findAllByBookerIdAndEndBeforeOrderByStartDesc(anyLong(), any())).thenReturn(bookings);
+        when(repository.findAllByBookerIdAndStartAfterOrderByStartDesc(anyLong(), any())).thenReturn(bookings);
+        when(repository.findAllByBookerIdAndStatusEqualsOrderByStartDesc(anyLong(), any())).thenReturn(bookings);
 
 
         assertThat(service.getAllByBookerId(booking.getBooker().getId(), "ALL", 0, 20).size()).isEqualTo(1);
@@ -142,21 +129,15 @@ class BookingServiceImplTest {
 
     @Test
     void findAllByOwnerId() {
-        when(userService.getByIdWithCheck(anyLong()))
-                .thenReturn(user);
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(user);
 
         List<Booking> bookings = List.of(booking);
 
-        when(repository.findAllByItemOwnerIdOrderByStartDesc(anyLong()))
-                .thenReturn(bookings);
-        when(repository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(), any()))
-                .thenReturn(bookings);
-        when(repository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(anyLong(), any()))
-                .thenReturn(bookings);
-        when(repository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(anyLong(), any()))
-                .thenReturn(bookings);
-        when(repository.findAllByItemOwnerIdAndStatusEqualsOrderByStartDesc(anyLong(), any()))
-                .thenReturn(bookings);
+        when(repository.findAllByItemOwnerIdOrderByStartDesc(anyLong())).thenReturn(bookings);
+        when(repository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(), any())).thenReturn(bookings);
+        when(repository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(anyLong(), any())).thenReturn(bookings);
+        when(repository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(anyLong(), any())).thenReturn(bookings);
+        when(repository.findAllByItemOwnerIdAndStatusEqualsOrderByStartDesc(anyLong(), any())).thenReturn(bookings);
 
         assertThat(service.getAllByOwnerId(booking.getItem().getOwnerId(), "ALL", 0, 20).size()).isEqualTo(1);
         assertThat(service.getAllByOwnerId(booking.getItem().getOwnerId(), "CURRENT", 0, 20).size()).isEqualTo(1);

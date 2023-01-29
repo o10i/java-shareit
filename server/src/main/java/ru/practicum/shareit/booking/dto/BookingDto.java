@@ -1,15 +1,15 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.enums.Status;
 
 import java.time.LocalDateTime;
 
-@Data
 @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingDto {
     Long id;
@@ -19,13 +19,15 @@ public class BookingDto {
     User booker;
     Item item;
 
-    @Data
+    @AllArgsConstructor
+    @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public static class User {
         Long id;
     }
 
-    @Data
+    @AllArgsConstructor
+    @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public static class Item {
         Long id;
