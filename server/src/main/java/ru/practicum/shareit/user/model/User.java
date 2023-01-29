@@ -7,10 +7,10 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "users")
+@AllArgsConstructor
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     @Id

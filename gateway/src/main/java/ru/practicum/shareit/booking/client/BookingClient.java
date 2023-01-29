@@ -19,12 +19,8 @@ public class BookingClient extends BaseClient {
 
     @Autowired
     public BookingClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build()
-        );
+        super(builder.uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
+                .requestFactory(HttpComponentsClientHttpRequestFactory::new).build());
     }
 
     public ResponseEntity<Object> save(long userId, BookingRequestDto requestDto) {
@@ -36,20 +32,12 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getAllByBookerId(long userId, BookingState state, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "state", state.name(),
-                "from", from,
-                "size", size
-        );
+        Map<String, Object> parameters = Map.of("state", state.name(), "from", from, "size", size);
         return get("?state={state}&from={from}&size={size}", userId, parameters);
     }
 
     public ResponseEntity<Object> getAllByOwnerId(long userId, BookingState state, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "state", state.name(),
-                "from", from,
-                "size", size
-        );
+        Map<String, Object> parameters = Map.of("state", state.name(), "from", from, "size", size);
         return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
     }
 

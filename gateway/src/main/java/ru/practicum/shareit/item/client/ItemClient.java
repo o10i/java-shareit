@@ -19,12 +19,8 @@ public class ItemClient extends BaseClient {
 
     @Autowired
     public ItemClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build()
-        );
+        super(builder.uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
+                .requestFactory(HttpComponentsClientHttpRequestFactory::new).build());
     }
 
     public ResponseEntity<Object> save(long userId, ItemRequestDto requestDto) {
@@ -36,10 +32,7 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getAllByOwnerId(long userId, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "from", from,
-                "size", size
-        );
+        Map<String, Object> parameters = Map.of("from", from, "size", size);
         return get("?from={from}&size={size}", userId, parameters);
     }
 
@@ -48,11 +41,7 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> search(String text, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "text", text,
-                "from", from,
-                "size", size
-        );
+        Map<String, Object> parameters = Map.of("text", text, "from", from, "size", size);
         return get("/search?text={text}&from={from}&size={size}", null, parameters);
     }
 
