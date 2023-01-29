@@ -34,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingDto add(Long userId, BookingRequestDto bookingRequestDto) {
+    public BookingDto save(Long userId, BookingRequestDto bookingRequestDto) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime start = bookingRequestDto.getStart();
         LocalDateTime end = bookingRequestDto.getEnd();
@@ -86,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllByBooker(Long userId, String state, Integer from, Integer size) {
+    public List<BookingDto> getAllByBookerId(Long userId, String state, Integer from, Integer size) {
         userService.findByIdWithCheck(userId);
 
         List<Booking> bookings = List.of();
@@ -112,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllByOwner(Long userId, String state, Integer from, Integer size) {
+    public List<BookingDto> getAllByOwnerId(Long userId, String state, Integer from, Integer size) {
         userService.findByIdWithCheck(userId);
 
         List<Booking> bookings = List.of();

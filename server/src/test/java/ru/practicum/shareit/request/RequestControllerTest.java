@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestShortDto;
+import ru.practicum.shareit.request.dto.RequestRequestDto;
 import ru.practicum.shareit.request.service.RequestService;
 
 import java.nio.charset.StandardCharsets;
@@ -32,8 +32,8 @@ class RequestControllerTest {
             "Хотел бы воспользоваться щёткой для обуви",
             Instant.now(),
             null);
-    private final RequestShortDto requestShortDto =
-            new RequestShortDto("Хотел бы воспользоваться щёткой для обуви");
+    private final RequestRequestDto requestRequestDto =
+            new RequestRequestDto("Хотел бы воспользоваться щёткой для обуви");
     @Autowired
     ObjectMapper mapper;
     @MockBean
@@ -43,12 +43,12 @@ class RequestControllerTest {
 
     @Test
     void save() throws Exception {
-        when(service.add(any(), any()))
+        when(service.save(any(), any()))
                 .thenReturn(requestDto);
 
         mvc.perform(post("/requests")
                         .header("X-Sharer-User-Id", 1L)
-                        .content(mapper.writeValueAsString(requestShortDto))
+                        .content(mapper.writeValueAsString(requestRequestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -60,7 +60,7 @@ class RequestControllerTest {
 
     @Test
     void findAllByRequestor() throws Exception {
-        when(service.getAllByRequestor(any()))
+        when(service.getAllByRequestorId(any()))
                 .thenReturn(List.of(requestDto));
 
         mvc.perform(get("/requests").header("X-Sharer-User-Id", 1L))
@@ -73,7 +73,7 @@ class RequestControllerTest {
 
     @Test
     void findAllByRequestorWithException() throws Exception {
-        when(service.getAllByRequestor(any()))
+        when(service.getAllByRequestorId(any()))
                 .thenThrow(NotFoundException.class);
 
         mvc.perform(get("/requests").header("X-Sharer-User-Id", 1L))

@@ -58,7 +58,7 @@ class ItemControllerTest {
 
     @Test
     void save() throws Exception {
-        when(service.add(any(), any()))
+        when(service.save(any(), any()))
                 .thenReturn(itemRequestDto);
 
         mvc.perform(post("/items")
@@ -119,7 +119,7 @@ class ItemControllerTest {
 
     @Test
     void findAllByOwnerId() throws Exception {
-        when(service.getAllByOwner(any(), any(), any()))
+        when(service.getAllByOwnerId(any(), any(), any()))
                 .thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items")
@@ -149,7 +149,7 @@ class ItemControllerTest {
 
     @Test
     void saveComment() throws Exception {
-        when(service.addComment(any(), any(), any()))
+        when(service.saveComment(any(), any(), any()))
                 .thenReturn(commentDto);
 
         mvc.perform(post("/items/{itemId}/comment", 1L)

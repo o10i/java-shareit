@@ -59,7 +59,7 @@ class BookingServiceImplTest {
         when(repository.save(any()))
                 .thenReturn(booking);
 
-        BookingDto savedBookingDto = service.add(2L, bookingRequestDto);
+        BookingDto savedBookingDto = service.save(2L, bookingRequestDto);
 
         assertThat(savedBookingDto.getId()).isEqualTo(1L);
         assertThat(savedBookingDto.getStart()).isNotNull();
@@ -68,13 +68,13 @@ class BookingServiceImplTest {
         assertThat(savedBookingDto.getBooker().getId()).isEqualTo(2L);
         assertThat(savedBookingDto.getItem().getId()).isEqualTo(item.getId());
 
-        assertThrows(NotFoundException.class, () -> service.add(1L, bookingRequestDto));
+        assertThrows(NotFoundException.class, () -> service.save(1L, bookingRequestDto));
 
         item.setAvailable(false);
-        assertThrows(BadRequestException.class, () -> service.add(2L, bookingRequestDto));
+        assertThrows(BadRequestException.class, () -> service.save(2L, bookingRequestDto));
 
         bookingRequestDto.setEnd(LocalDateTime.now());
-        assertThrows(BadRequestException.class, () -> service.add(2L, bookingRequestDto));
+        assertThrows(BadRequestException.class, () -> service.save(2L, bookingRequestDto));
     }
 
 
@@ -133,11 +133,11 @@ class BookingServiceImplTest {
                 .thenReturn(bookings);
 
 
-        assertThat(service.getAllByBooker(booking.getBooker().getId(), "ALL", 0, 20).size()).isEqualTo(1);
-        assertThat(service.getAllByBooker(booking.getBooker().getId(), "CURRENT", 0, 20).size()).isEqualTo(1);
-        assertThat(service.getAllByBooker(booking.getBooker().getId(), "PAST", 0, 20).size()).isEqualTo(1);
-        assertThat(service.getAllByBooker(booking.getBooker().getId(), "FUTURE", 0, 20).size()).isEqualTo(1);
-        assertThat(service.getAllByBooker(booking.getBooker().getId(), "WAITING", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByBookerId(booking.getBooker().getId(), "ALL", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByBookerId(booking.getBooker().getId(), "CURRENT", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByBookerId(booking.getBooker().getId(), "PAST", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByBookerId(booking.getBooker().getId(), "FUTURE", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByBookerId(booking.getBooker().getId(), "WAITING", 0, 20).size()).isEqualTo(1);
     }
 
     @Test
@@ -158,10 +158,10 @@ class BookingServiceImplTest {
         when(repository.findAllByItemOwnerIdAndStatusEqualsOrderByStartDesc(anyLong(), any()))
                 .thenReturn(bookings);
 
-        assertThat(service.getAllByOwner(booking.getItem().getOwnerId(), "ALL", 0, 20).size()).isEqualTo(1);
-        assertThat(service.getAllByOwner(booking.getItem().getOwnerId(), "CURRENT", 0, 20).size()).isEqualTo(1);
-        assertThat(service.getAllByOwner(booking.getItem().getOwnerId(), "PAST", 0, 20).size()).isEqualTo(1);
-        assertThat(service.getAllByOwner(booking.getItem().getOwnerId(), "FUTURE", 0, 20).size()).isEqualTo(1);
-        assertThat(service.getAllByOwner(booking.getItem().getOwnerId(), "WAITING", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByOwnerId(booking.getItem().getOwnerId(), "ALL", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByOwnerId(booking.getItem().getOwnerId(), "CURRENT", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByOwnerId(booking.getItem().getOwnerId(), "PAST", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByOwnerId(booking.getItem().getOwnerId(), "FUTURE", 0, 20).size()).isEqualTo(1);
+        assertThat(service.getAllByOwnerId(booking.getItem().getOwnerId(), "WAITING", 0, 20).size()).isEqualTo(1);
     }
 }

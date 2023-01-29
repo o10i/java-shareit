@@ -3,7 +3,7 @@ package ru.practicum.shareit.request;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestShortDto;
+import ru.practicum.shareit.request.dto.RequestRequestDto;
 import ru.practicum.shareit.request.service.RequestService;
 
 import java.util.List;
@@ -15,9 +15,9 @@ public class RequestController {
     private final RequestService service;
 
     @PostMapping()
-    public RequestDto add(@RequestHeader("X-Sharer-User-Id") Long requestorId,
-                          @RequestBody RequestShortDto requestShortDto) {
-        return service.add(requestorId, requestShortDto);
+    public RequestDto save(@RequestHeader("X-Sharer-User-Id") Long userId,
+                           @RequestBody RequestRequestDto requestRequestDto) {
+        return service.save(userId, requestRequestDto);
     }
 
     @GetMapping("/{requestId}")
@@ -34,7 +34,7 @@ public class RequestController {
     }
 
     @GetMapping()
-    public List<RequestDto> getAllByRequestor(@RequestHeader("X-Sharer-User-Id") Long requestorId) {
-        return service.getAllByRequestor(requestorId);
+    public List<RequestDto> getAllByRequestorId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return service.getAllByRequestorId(userId);
     }
 }

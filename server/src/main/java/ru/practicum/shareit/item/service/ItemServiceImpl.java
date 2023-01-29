@@ -44,7 +44,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public ItemRequestDto add(Long userId, ItemRequestDto itemRequestDto) {
+    public ItemRequestDto save(Long userId, ItemRequestDto itemRequestDto) {
         userService.findByIdWithCheck(userId);
         return toItemShortDto(repository.save(toItem(itemRequestDto, userId)));
     }
@@ -91,7 +91,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getAllByOwner(Long userId, Integer from, Integer size) {
+    public List<ItemDto> getAllByOwnerId(Long userId, Integer from, Integer size) {
         userService.findByIdWithCheck(userId);
 
         List<Item> items = repository.findAllByOwnerIdOrderById(userId)
@@ -130,7 +130,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public CommentDto addComment(Long userId, Long itemId, Comment comment) {
+    public CommentDto saveComment(Long userId, Long itemId, Comment comment) {
         User author = userService.findByIdWithCheck(userId);
         Item item = findByIdWithCheck(itemId);
 

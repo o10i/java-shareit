@@ -21,21 +21,21 @@ public class RequestController {
     private final RequestClient requestClient;
 
     @PostMapping
-    public ResponseEntity<Object> add(@RequestHeader("X-Sharer-User-Id") long userId,
-                                      @RequestBody @Valid RequestRequestDto requestDto) {
+    public ResponseEntity<Object> save(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                       @RequestBody @Valid RequestRequestDto requestDto) {
         log.info("Create request {}, userId={}", requestDto, userId);
-        return requestClient.add(userId, requestDto);
+        return requestClient.save(userId, requestDto);
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<Object> getById(@RequestHeader("X-Sharer-User-Id") long userId,
-                                          @PathVariable long requestId) {
+    public ResponseEntity<Object> getById(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                          @PathVariable Long requestId) {
         log.info("Get requestId={}, userId={}", requestId, userId);
         return requestClient.getById(userId, requestId);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Object> getAll(@RequestHeader("X-Sharer-User-Id") long userId,
+    public ResponseEntity<Object> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                          @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Get all requests by userId={}, from={}, size={}", userId, from, size);
@@ -43,8 +43,8 @@ public class RequestController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllByRequestor(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public ResponseEntity<Object> getAllByRequestorId(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Get requests by requestor with userId={}", userId);
-        return requestClient.getAllByRequestor(userId);
+        return requestClient.getAllByRequestorId(userId);
     }
 }

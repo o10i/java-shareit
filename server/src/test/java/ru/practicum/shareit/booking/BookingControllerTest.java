@@ -46,7 +46,7 @@ class BookingControllerTest {
 
     @Test
     void save() throws Exception {
-        when(service.add(any(), any()))
+        when(service.save(any(), any()))
                 .thenReturn(bookingDto);
 
         mvc.perform(post("/bookings")
@@ -113,7 +113,7 @@ class BookingControllerTest {
 
     @Test
     void getAllByBooker() throws Exception {
-        when(service.getAllByBooker(any(), any(), any(), any()))
+        when(service.getAllByBookerId(any(), any(), any(), any()))
                 .thenReturn(List.of(bookingDto));
 
         mvc.perform(get("/bookings")
@@ -131,7 +131,7 @@ class BookingControllerTest {
 
     @Test
     void getAllByOwner() throws Exception {
-        when(service.getAllByOwner(any(), any(), any(), any()))
+        when(service.getAllByOwnerId(any(), any(), any(), any()))
                 .thenReturn(List.of(bookingDto));
 
         mvc.perform(get("/bookings/owner")

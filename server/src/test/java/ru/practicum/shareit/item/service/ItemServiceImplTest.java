@@ -60,7 +60,7 @@ class ItemServiceImplTest {
         when(repository.save(any()))
                 .thenReturn(item);
 
-        ItemRequestDto savedItemRequestDto = service.add(user.getId(), itemRequestDto);
+        ItemRequestDto savedItemRequestDto = service.save(user.getId(), itemRequestDto);
 
         assertThat(savedItemRequestDto.getId()).isEqualTo(1L);
         assertThat(savedItemRequestDto.getName()).isEqualTo("itemName");
@@ -147,7 +147,7 @@ class ItemServiceImplTest {
         when(commentRepository.save(any()))
                 .thenReturn(comment);
 
-        CommentDto commentDto = service.addComment(user.getId(), item.getId(), comment);
+        CommentDto commentDto = service.saveComment(user.getId(), item.getId(), comment);
 
         assertThat(commentDto.getId()).isEqualTo(1L);
         assertThat(commentDto.getText()).isEqualTo("comment");
@@ -157,6 +157,6 @@ class ItemServiceImplTest {
         when(bookingRepository.findAllByBookerIdAndItemIdAndEndBeforeAndStatusEquals(any(), any(), any(), any()))
                 .thenReturn(List.of());
 
-        assertThrows(BadRequestException.class, () -> service.addComment(user.getId(), item.getId(), comment));
+        assertThrows(BadRequestException.class, () -> service.saveComment(user.getId(), item.getId(), comment));
     }
 }

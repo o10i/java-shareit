@@ -13,7 +13,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.Request;
 import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestShortDto;
+import ru.practicum.shareit.request.dto.RequestRequestDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
@@ -31,13 +31,13 @@ public class RequestServiceImpl implements RequestService {
     ItemRepository itemRepository;
 
     @Override
-    public RequestDto add(Long requestorId, RequestShortDto requestShortDto) {
+    public RequestDto save(Long requestorId, RequestRequestDto requestRequestDto) {
         User requestor = userService.findByIdWithCheck(requestorId);
-        return toRequestDto(repository.save(toRequest(requestShortDto, requestor)));
+        return toRequestDto(repository.save(toRequest(requestRequestDto, requestor)));
     }
 
     @Override
-    public List<RequestDto> getAllByRequestor(Long requestorId) {
+    public List<RequestDto> getAllByRequestorId(Long requestorId) {
         User requestor = userService.findByIdWithCheck(requestorId);
 
         List<Request> requests = repository.findAllByRequestorOrderByCreatedDesc(requestor);

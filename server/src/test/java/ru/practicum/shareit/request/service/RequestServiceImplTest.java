@@ -12,7 +12,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.Request;
 import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestShortDto;
+import ru.practicum.shareit.request.dto.RequestRequestDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
@@ -35,14 +35,14 @@ class RequestServiceImplTest {
     ItemRepository itemRepository;
     User requestor;
     Request request;
-    RequestShortDto requestShortDto;
+    RequestRequestDto requestRequestDto;
 
     @BeforeEach
     public void setup() {
         service = new RequestServiceImpl(repository, userService, itemRepository);
         requestor = new User(1L, "name", "email@email.ru");
         request = new Request(1L, "description", requestor, Instant.now(), null);
-        requestShortDto = new RequestShortDto("description");
+        requestRequestDto = new RequestRequestDto("description");
     }
 
     @Test
@@ -52,7 +52,7 @@ class RequestServiceImplTest {
         when(repository.save(any()))
                 .thenReturn(request);
 
-        RequestDto savedRequestDto = service.add(request.getId(), requestShortDto);
+        RequestDto savedRequestDto = service.save(request.getId(), requestRequestDto);
 
         assertThat(savedRequestDto.getId()).isEqualTo(1L);
         assertThat(savedRequestDto.getDescription()).isEqualTo("description");
@@ -65,7 +65,7 @@ class RequestServiceImplTest {
         when(repository.findAllByRequestorOrderByCreatedDesc(any()))
                 .thenReturn(List.of(request));
 
-        List<RequestDto> requestDtos = service.getAllByRequestor(requestor.getId());
+        List<RequestDto> requestDtos = service.getAllByRequestorId(requestor.getId());
 
         assertThat(requestDtos.size()).isEqualTo(1);
         assertThat(requestDtos.get(0).getId()).isEqualTo(1L);

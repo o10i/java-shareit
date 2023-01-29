@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestShortDto;
+import ru.practicum.shareit.request.dto.RequestRequestDto;
 import ru.practicum.shareit.user.User;
 
 import java.time.Instant;
@@ -25,9 +25,9 @@ public final class RequestMapper {
         return requests.stream().map(RequestMapper::toRequestDto).collect(Collectors.toList());
     }
 
-    public static Request toRequest(RequestShortDto requestShortDto, User requestor) {
+    public static Request toRequest(RequestRequestDto requestRequestDto, User requestor) {
         Request request = new Request();
-        request.setDescription(requestShortDto.getDescription());
+        request.setDescription(requestRequestDto.getDescription());
         request.setRequestor(requestor);
         request.setCreated(Instant.now());
         return request;

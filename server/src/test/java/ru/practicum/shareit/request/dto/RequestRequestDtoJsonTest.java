@@ -10,15 +10,15 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 @JsonTest
-class RequestShortDtoJsonTest {
+class RequestRequestDtoJsonTest {
     @Autowired
-    private JacksonTester<RequestShortDto> json;
+    private JacksonTester<RequestRequestDto> json;
 
     @Test
     void testRequestShortDto() throws Exception {
-        RequestShortDto requestShortDto = new RequestShortDto("testDescription");
+        RequestRequestDto requestRequestDto = new RequestRequestDto("testDescription");
 
-        JsonContent<RequestShortDto> result = json.write(requestShortDto);
+        JsonContent<RequestRequestDto> result = json.write(requestRequestDto);
 
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("testDescription");
     }

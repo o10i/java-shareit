@@ -15,9 +15,9 @@ public class BookingController {
     private final BookingService service;
 
     @PostMapping()
-    public BookingDto add(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @RequestBody BookingRequestDto bookingRequestDto) {
-        return service.add(userId, bookingRequestDto);
+    public BookingDto save(@RequestHeader("X-Sharer-User-Id") Long userId,
+                           @RequestBody BookingRequestDto bookingRequestDto) {
+        return service.save(userId, bookingRequestDto);
     }
 
     @GetMapping("/{bookingId}")
@@ -27,19 +27,19 @@ public class BookingController {
     }
 
     @GetMapping()
-    public List<BookingDto> getAllByBooker(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                           @RequestParam(required = false) String state,
-                                           @RequestParam(required = false) Integer from,
-                                           @RequestParam(required = false) Integer size) {
-        return service.getAllByBooker(userId, state, from, size);
+    public List<BookingDto> getAllByBookerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                             @RequestParam(required = false) String state,
+                                             @RequestParam(required = false) Integer from,
+                                             @RequestParam(required = false) Integer size) {
+        return service.getAllByBookerId(userId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                          @RequestParam(required = false) String state,
-                                          @RequestParam(required = false) Integer from,
-                                          @RequestParam(required = false) Integer size) {
-        return service.getAllByOwner(userId, state, from, size);
+    public List<BookingDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                            @RequestParam(required = false) String state,
+                                            @RequestParam(required = false) Integer from,
+                                            @RequestParam(required = false) Integer size) {
+        return service.getAllByOwnerId(userId, state, from, size);
     }
 
     @PatchMapping("/{bookingId}")

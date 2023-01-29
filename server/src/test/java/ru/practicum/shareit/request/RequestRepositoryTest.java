@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.practicum.shareit.request.dto.RequestShortDto;
+import ru.practicum.shareit.request.dto.RequestRequestDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -27,8 +27,8 @@ class RequestRepositoryTest {
         User requestor = new User(1L, "name", "email@email.ru");
         userRepository.save(requestor);
 
-        RequestShortDto requestShortDto = new RequestShortDto("test");
-        Request request = toRequest(requestShortDto, requestor);
+        RequestRequestDto requestRequestDto = new RequestRequestDto("test");
+        Request request = toRequest(requestRequestDto, requestor);
         repository.save(request);
 
         List<Request> requests = repository.findAllByRequestorOrderByCreatedDesc(requestor);

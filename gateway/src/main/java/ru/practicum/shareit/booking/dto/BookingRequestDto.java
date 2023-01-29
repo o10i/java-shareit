@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BookItemRequestDto {
+public class BookingRequestDto {
 	long itemId;
 	@FutureOrPresent
 	LocalDateTime start;
