@@ -46,7 +46,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemRequestDto save(Long userId, ItemRequestDto itemRequestDto) {
         userService.getByIdWithCheck(userId);
-        return toItemShortDto(repository.save(toItem(itemRequestDto, userId)));
+        return toItemRequestDto(repository.save(toItem(itemRequestDto, userId)));
     }
 
     @Transactional
@@ -70,7 +70,7 @@ public class ItemServiceImpl implements ItemService {
             itemToUpdate.setAvailable(itemRequestDto.getAvailable());
         }
 
-        return toItemShortDto(itemToUpdate);
+        return toItemRequestDto(itemToUpdate);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank()) {
             return List.of();
         }
-        return toListItemShortDto(repository.search(text, PageRequest.of(from / size, size)).getContent());
+        return toListItemRequestDto(repository.search(text, PageRequest.of(from / size, size)).getContent());
     }
 
     @Transactional

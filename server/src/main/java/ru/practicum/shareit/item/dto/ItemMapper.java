@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ItemMapper {
-    public static ItemRequestDto toItemShortDto(Item item) {
+    public static ItemRequestDto toItemRequestDto(Item item) {
         return new ItemRequestDto(
                 item.getId(),
                 item.getName(),
@@ -18,8 +18,8 @@ public final class ItemMapper {
                 item.getRequestId());
     }
 
-    public static List<ItemRequestDto> toListItemShortDto(List<Item> items) {
-        return items.stream().map(ItemMapper::toItemShortDto).collect(Collectors.toList());
+    public static List<ItemRequestDto> toListItemRequestDto(List<Item> items) {
+        return items.stream().map(ItemMapper::toItemRequestDto).collect(Collectors.toList());
     }
 
     public static ItemDto toItemDto(Item item) {

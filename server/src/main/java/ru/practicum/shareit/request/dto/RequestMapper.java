@@ -17,7 +17,7 @@ public final class RequestMapper {
         return new RequestDto(request.getId(),
                 request.getDescription(),
                 request.getCreated(),
-                request.getItems() == null ? List.of() : ItemMapper.toListItemShortDto(request.getItems()));
+                request.getItems() == null ? List.of() : ItemMapper.toListItemRequestDto(request.getItems()));
     }
 
     public static List<RequestDto> toListRequestDto(List<Request> requests) {
