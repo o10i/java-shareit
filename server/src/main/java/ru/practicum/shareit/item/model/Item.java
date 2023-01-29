@@ -2,7 +2,7 @@ package ru.practicum.shareit.item.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.model.Booking;
 
 import javax.persistence.*;
 import java.util.Set;
