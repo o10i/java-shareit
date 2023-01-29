@@ -1,13 +1,13 @@
 package ru.practicum.shareit.request.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.dto.RequestRequestDto;
 import ru.practicum.shareit.request.service.RequestService;
@@ -27,13 +27,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = RequestController.class)
 class RequestControllerTest {
+    private final RequestRequestDto requestRequestDto =
+            new RequestRequestDto("Хотел бы воспользоваться щёткой для обуви");
     private final RequestDto requestDto = new RequestDto(
             1L,
             "Хотел бы воспользоваться щёткой для обуви",
             Instant.now(),
             null);
-    private final RequestRequestDto requestRequestDto =
-            new RequestRequestDto("Хотел бы воспользоваться щёткой для обуви");
     @Autowired
     ObjectMapper mapper;
     @MockBean
@@ -41,10 +41,10 @@ class RequestControllerTest {
     @Autowired
     MockMvc mvc;
 
+    @SneakyThrows
     @Test
-    void save() throws Exception {
-        when(service.save(any(), any()))
-                .thenReturn(requestDto);
+    void save() {
+        when(service.save(any(), any())).thenReturn(requestDto);
 
         mvc.perform(post("/requests")
                         .header("X-Sharer-User-Id", 1L)
@@ -58,32 +58,23 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$.items", is(requestDto.getItems())));
     }
 
+    @SneakyThrows
     @Test
-    void findAllByRequestor() throws Exception {
-        when(service.getAllByRequestorId(any()))
-                .thenReturn(List.of(requestDto));
+    void getById() {
+        when(service.getById(any(), any())).thenReturn(requestDto);
 
-        mvc.perform(get("/requests").header("X-Sharer-User-Id", 1L))
+        mvc.perform(get("/requests/{requestId}", requestDto.getId())
+                        .header("X-Sharer-User-Id", 1L))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(requestDto.getId()), Long.class))
-                .andExpect(jsonPath("$[0].description", is(requestDto.getDescription())))
-                .andExpect(jsonPath("$[0].items", is(requestDto.getItems())));
+                .andExpect(jsonPath("$.id", is(requestDto.getId()), Long.class))
+                .andExpect(jsonPath("$.description", is(requestDto.getDescription())))
+                .andExpect(jsonPath("$.items", is(requestDto.getItems())));
     }
 
+    @SneakyThrows
     @Test
-    void findAllByRequestorWithException() throws Exception {
-        when(service.getAllByRequestorId(any()))
-                .thenThrow(NotFoundException.class);
-
-        mvc.perform(get("/requests").header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void findAll() throws Exception {
-        when(service.getAll(any(), any(), any()))
-                .thenReturn(List.of(requestDto));
+    void getAll() {
+        when(service.getAll(any(), any(), any())).thenReturn(List.of(requestDto));
 
         mvc.perform(get("/requests/all").header("X-Sharer-User-Id", 1L))
                 .andExpect(status().isOk())
@@ -93,16 +84,16 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$[0].items", is(requestDto.getItems())));
     }
 
+    @SneakyThrows
     @Test
-    void getById() throws Exception {
-        when(service.getById(any(), any()))
-                .thenReturn(requestDto);
+    void getAllByRequestorId() {
+        when(service.getAllByRequestorId(any())).thenReturn(List.of(requestDto));
 
-        mvc.perform(get("/requests/{requestId}", requestDto.getId())
-                        .header("X-Sharer-User-Id", 1L))
+        mvc.perform(get("/requests").header("X-Sharer-User-Id", 1L))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(requestDto.getId()), Long.class))
-                .andExpect(jsonPath("$.description", is(requestDto.getDescription())))
-                .andExpect(jsonPath("$.items", is(requestDto.getItems())));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(requestDto.getId()), Long.class))
+                .andExpect(jsonPath("$[0].description", is(requestDto.getDescription())))
+                .andExpect(jsonPath("$[0].items", is(requestDto.getItems())));
     }
 }

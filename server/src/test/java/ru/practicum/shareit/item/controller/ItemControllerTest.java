@@ -30,6 +30,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ItemController.class)
 class ItemControllerTest {
+    private final ItemRequestDto itemRequestDto = new ItemRequestDto(1L,
+            "Дрель",
+            "Простая дрель",
+            true,
+            null);
     private final ItemDto itemDto = new ItemDto(
             1L,
             "Дрель",
@@ -38,13 +43,6 @@ class ItemControllerTest {
             new ItemDto.BookingDto(1L, 1L),
             new ItemDto.BookingDto(2L, 1L),
             Set.of());
-
-    private final ItemRequestDto itemRequestDto = new ItemRequestDto(1L,
-            "Дрель",
-            "Простая дрель",
-            true,
-            null);
-
     private final CommentDto commentDto = new CommentDto(
             1L,
             "comment from user1",
@@ -62,8 +60,7 @@ class ItemControllerTest {
     @SneakyThrows
     @Test
     void save() {
-        when(service.save(any(), any()))
-                .thenReturn(itemRequestDto);
+        when(service.save(any(), any())).thenReturn(itemRequestDto);
 
         mvc.perform(post("/items")
                         .header("X-Sharer-User-Id", 1L)
@@ -80,9 +77,8 @@ class ItemControllerTest {
 
     @SneakyThrows
     @Test
-    void save_thenBadRequest() {
-        when(service.save(any(), any()))
-                .thenThrow(BadRequestException.class);
+    void save_thenBadRequestExceptionThrown() {
+        when(service.save(any(), any())).thenThrow(BadRequestException.class);
 
         mvc.perform(post("/items")
                         .header("X-Sharer-User-Id", 1L)
@@ -95,10 +91,48 @@ class ItemControllerTest {
 
     @SneakyThrows
     @Test
+    void getById() {
+        when(service.getById(any(), any())).thenReturn(itemDto);
+
+        mvc.perform(get("/items/{itemId}", itemDto.getId())
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(itemDto.getName())))
+                .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
+                .andExpect(jsonPath("$.available", is(itemDto.getAvailable())));
+    }
+
+    @SneakyThrows
+    @Test
+    void getById_thenNotFoundExceptionThrown() {
+        when(service.getById(any(), any())).thenThrow(NotFoundException.class);
+
+        mvc.perform(get("/items/{itemId}", itemDto.getId())
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isNotFound());
+    }
+
+    @SneakyThrows
+    @Test
+    void getAllByOwnerId() {
+        when(service.getAllByOwnerId(any(), any(), any())).thenReturn(List.of(itemDto));
+
+        mvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(itemDto.getId()), Long.class))
+                .andExpect(jsonPath("$[0].name", is(itemDto.getName())))
+                .andExpect(jsonPath("$[0].description", is(itemDto.getDescription())))
+                .andExpect(jsonPath("$[0].available", is(itemDto.getAvailable())));
+    }
+
+    @SneakyThrows
+    @Test
     void update() {
         itemRequestDto.setName("updated");
-        when(service.update(any(), any(), any()))
-                .thenReturn(itemRequestDto);
+        when(service.update(any(), any(), any())).thenReturn(itemRequestDto);
 
         mvc.perform(patch("/items/{itemId}", 1L)
                         .header("X-Sharer-User-Id", 1L)
@@ -115,7 +149,7 @@ class ItemControllerTest {
 
     @SneakyThrows
     @Test
-    void update_thenForbidden() {
+    void update_thenForbiddenExceptionThrown() {
         itemRequestDto.setName("updated");
         when(service.update(any(), any(), any()))
                 .thenThrow(ForbiddenException.class);
@@ -131,51 +165,8 @@ class ItemControllerTest {
 
     @SneakyThrows
     @Test
-    void getById() {
-        when(service.getById(any(), any()))
-                .thenReturn(itemDto);
-
-        mvc.perform(get("/items/{itemId}", itemDto.getId())
-                        .header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(itemDto.getName())))
-                .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
-                .andExpect(jsonPath("$.available", is(itemDto.getAvailable())));
-    }
-
-    @SneakyThrows
-    @Test
-    void getByIdWithException() {
-        when(service.getById(any(), any()))
-                .thenThrow(NotFoundException.class);
-
-        mvc.perform(get("/items/{itemId}", itemDto.getId())
-                        .header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isNotFound());
-    }
-
-    @SneakyThrows
-    @Test
-    void getAllByOwnerId() {
-        when(service.getAllByOwnerId(any(), any(), any()))
-                .thenReturn(List.of(itemDto));
-
-        mvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(itemDto.getId()), Long.class))
-                .andExpect(jsonPath("$[0].name", is(itemDto.getName())))
-                .andExpect(jsonPath("$[0].description", is(itemDto.getDescription())))
-                .andExpect(jsonPath("$[0].available", is(itemDto.getAvailable())));
-    }
-
-    @SneakyThrows
-    @Test
     void search() {
-        when(service.search(any(), any(), any()))
-                .thenReturn(List.of(itemRequestDto));
+        when(service.search(any(), any(), any())).thenReturn(List.of(itemRequestDto));
 
         mvc.perform(get("/items/search")
                         .param("text", "дрель"))
@@ -190,8 +181,7 @@ class ItemControllerTest {
     @SneakyThrows
     @Test
     void saveComment() {
-        when(service.saveComment(any(), any(), any()))
-                .thenReturn(commentDto);
+        when(service.saveComment(any(), any(), any())).thenReturn(commentDto);
 
         mvc.perform(post("/items/{itemId}/comment", 1L)
                         .header("X-Sharer-User-Id", 1L)

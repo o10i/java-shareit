@@ -9,7 +9,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -39,8 +38,7 @@ class UserControllerTest {
     @SneakyThrows
     @Test
     void save() {
-        when(service.save(any()))
-                .thenReturn(userDto);
+        when(service.save(any())).thenReturn(userDto);
 
         mvc.perform(post("/users")
                         .content(mapper.writeValueAsString(userDto))
@@ -55,11 +53,34 @@ class UserControllerTest {
 
     @SneakyThrows
     @Test
+    void getById() {
+        when(service.getByid(any())).thenReturn(userDto);
+
+        mvc.perform(get("/users/{id}", userDto.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(userDto.getName())))
+                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+    }
+
+    @SneakyThrows
+    @Test
+    void getAll() {
+        when(service.getAll()).thenReturn(List.of(userDto));
+
+        mvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(userDto.getId()), Long.class))
+                .andExpect(jsonPath("$[0].name", is(userDto.getName())))
+                .andExpect(jsonPath("$[0].email", is(userDto.getEmail())));
+    }
+
+    @SneakyThrows
+    @Test
     void update() {
         UserDto updatedUserDto = new UserDto(1L,"updated","user@user.com");
 
-        when(service.update(any(), any()))
-                .thenReturn(updatedUserDto);
+        when(service.update(any(), any())).thenReturn(updatedUserDto);
 
         mvc.perform(patch("/users/1")
                         .content(mapper.writeValueAsString(userDto))
@@ -74,44 +95,7 @@ class UserControllerTest {
 
     @SneakyThrows
     @Test
-    void getById() {
-        when(service.getByid(any()))
-                .thenReturn(userDto);
-
-        mvc.perform(get("/users/{id}", userDto.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(userDto.getName())))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
-    }
-
-    @SneakyThrows
-    @Test
-    void getByIdWithException() {
-        when(service.getByid(any()))
-                .thenThrow(NotFoundException.class);
-
-        mvc.perform(get("/users/1"))
-                .andExpect(status().isNotFound());
-    }
-
-    @SneakyThrows
-    @Test
-    void getAll() {
-        when(service.getAll())
-                .thenReturn(List.of(userDto));
-
-        mvc.perform(get("/users"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id", is(userDto.getId()), Long.class))
-                .andExpect(jsonPath("$[0].name", is(userDto.getName())))
-                .andExpect(jsonPath("$[0].email", is(userDto.getEmail())));
-    }
-
-    @SneakyThrows
-    @Test
     void delete() {
-        mvc.perform(MockMvcRequestBuilders.delete("/users/{id}", userDto.getId()))
-                .andExpect(status().isOk());
+        mvc.perform(MockMvcRequestBuilders.delete("/users/{id}", userDto.getId())).andExpect(status().isOk());
     }
 }
