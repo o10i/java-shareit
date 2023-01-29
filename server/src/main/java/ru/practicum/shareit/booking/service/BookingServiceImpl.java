@@ -50,14 +50,14 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException(String.format("Item with id=%d unavailable.", item.getId()));
         }
 
-        User booker = userService.findByIdWithCheck(userId);
+        User booker = userService.getByIdWithCheck(userId);
         return toBookingDto(repository.save(toBooking(bookingRequestDto, item, booker)));
     }
 
     @Transactional
     @Override
     public BookingDto approve(Long userId, Long bookingId, Boolean approved) {
-        userService.findByIdWithCheck(userId);
+        userService.getByIdWithCheck(userId);
 
         Booking booking = findByIdWithCheck(bookingId);
         if (!userId.equals(booking.getItem().getOwnerId())) {
@@ -72,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto getById(Long userId, Long bookingId) {
-        userService.findByIdWithCheck(userId);
+        userService.getByIdWithCheck(userId);
 
         Booking booking = findByIdWithCheck(bookingId);
 
@@ -87,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getAllByBookerId(Long userId, String state, Integer from, Integer size) {
-        userService.findByIdWithCheck(userId);
+        userService.getByIdWithCheck(userId);
 
         List<Booking> bookings = List.of();
         switch (state) {
@@ -113,7 +113,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getAllByOwnerId(Long userId, String state, Integer from, Integer size) {
-        userService.findByIdWithCheck(userId);
+        userService.getByIdWithCheck(userId);
 
         List<Booking> bookings = List.of();
         switch (state) {

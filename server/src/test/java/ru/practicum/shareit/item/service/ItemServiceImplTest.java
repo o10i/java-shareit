@@ -44,6 +44,7 @@ class ItemServiceImplTest {
     Item item;
     ItemRequestDto itemRequestDto;
     Comment comment;
+    Booking booking;
 
     @BeforeEach
     public void setup() {
@@ -52,11 +53,12 @@ class ItemServiceImplTest {
         item = new Item(1L, "itemName", "itemDescription", true, 1L, null, null, null, null);
         itemRequestDto = new ItemRequestDto(1L, "itemName", "itemDescription", true, null);
         comment = new Comment(1L, "comment", item, user, LocalDateTime.now());
+        booking = new Booking(1L, null, null, null, user, null);
     }
 
     @Test
     void save() {
-        when(userService.findByIdWithCheck(anyLong()))
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
         when(repository.save(any()))
                 .thenReturn(item);
@@ -71,7 +73,7 @@ class ItemServiceImplTest {
 
     @Test
     void update() {
-        when(userService.findByIdWithCheck(anyLong()))
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
         when(repository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
@@ -88,11 +90,15 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void findById() {
-        when(userService.findByIdWithCheck(anyLong()))
+    void getById() {
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
         when(repository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
+        when(bookingRepository.findFirstByItemIdAndEndBeforeAndStatusEqualsOrderByEndDesc(anyLong(), any(), any()))
+                .thenReturn(booking);
+        when(bookingRepository.findFirstByItemIdAndStartAfterAndStatusEqualsOrderByStart(anyLong(), any(), any()))
+                .thenReturn(booking);
 
         ItemDto foundItemDto = service.getById(user.getId(), itemRequestDto.getId());
 
@@ -103,8 +109,8 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void findAllByOwnerId() {
-        when(userService.findByIdWithCheck(anyLong()))
+    void getAllByOwnerId() {
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
 
         List<Item> items = List.of(item);
@@ -141,7 +147,7 @@ class ItemServiceImplTest {
 
     @Test
     void saveComment() {
-        when(userService.findByIdWithCheck(anyLong()))
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
         when(repository.findById(anyLong()))
                 .thenReturn(Optional.of(item));

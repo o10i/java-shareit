@@ -45,14 +45,14 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public ItemRequestDto save(Long userId, ItemRequestDto itemRequestDto) {
-        userService.findByIdWithCheck(userId);
+        userService.getByIdWithCheck(userId);
         return toItemShortDto(repository.save(toItem(itemRequestDto, userId)));
     }
 
     @Transactional
     @Override
     public ItemRequestDto update(Long userId, Long itemId, ItemRequestDto itemRequestDto) {
-        userService.findByIdWithCheck(userId);
+        userService.getByIdWithCheck(userId);
 
         Item itemToUpdate = findByIdWithCheck(itemId);
 
@@ -75,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getById(Long userId, Long itemId) {
-        userService.findByIdWithCheck(userId);
+        userService.getByIdWithCheck(userId);
 
         Item item = findByIdWithCheck(itemId);
         item.setComments(commentRepository.findAllByItemId(itemId));
@@ -92,7 +92,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getAllByOwnerId(Long userId, Integer from, Integer size) {
-        userService.findByIdWithCheck(userId);
+        userService.getByIdWithCheck(userId);
 
         List<Item> items = repository.findAllByOwnerIdOrderById(userId)
                 .stream().skip(from).limit(size).collect(Collectors.toList());
@@ -131,7 +131,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public CommentDto saveComment(Long userId, Long itemId, Comment comment) {
-        User author = userService.findByIdWithCheck(userId);
+        User author = userService.getByIdWithCheck(userId);
         Item item = findByIdWithCheck(itemId);
 
         if (bookingRepository.findAllByBookerIdAndItemIdAndEndBeforeAndStatusEquals(

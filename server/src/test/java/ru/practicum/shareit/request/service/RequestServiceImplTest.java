@@ -47,7 +47,7 @@ class RequestServiceImplTest {
 
     @Test
     void save() {
-        when(userService.findByIdWithCheck(any()))
+        when(userService.getByIdWithCheck(any()))
                 .thenReturn(requestor);
         when(repository.save(any()))
                 .thenReturn(request);
@@ -94,7 +94,7 @@ class RequestServiceImplTest {
 
     @Test
     void findById() {
-        when(userService.findByIdWithCheck(any()))
+        when(userService.getByIdWithCheck(any()))
                 .thenReturn(requestor);
         when(repository.findById(any()))
                 .thenReturn(Optional.of(request));

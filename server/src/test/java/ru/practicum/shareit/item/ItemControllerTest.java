@@ -7,6 +7,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -75,6 +77,20 @@ class ItemControllerTest {
     }
 
     @Test
+    void save_thenBadRequest() throws Exception {
+        when(service.save(any(), any()))
+                .thenThrow(BadRequestException.class);
+
+        mvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", 1L)
+                        .content(mapper.writeValueAsString(itemRequestDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void update() throws Exception {
         itemRequestDto.setName("updated");
         when(service.update(any(), any(), any()))
@@ -91,6 +107,21 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.name", is(itemRequestDto.getName())))
                 .andExpect(jsonPath("$.description", is(itemRequestDto.getDescription())))
                 .andExpect(jsonPath("$.available", is(itemRequestDto.getAvailable())));
+    }
+
+    @Test
+    void update_thenForbidden() throws Exception {
+        itemRequestDto.setName("updated");
+        when(service.update(any(), any(), any()))
+                .thenThrow(ForbiddenException.class);
+
+        mvc.perform(patch("/items/{itemId}", 1L)
+                        .header("X-Sharer-User-Id", 1L)
+                        .content(mapper.writeValueAsString(itemRequestDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
     }
 
     @Test

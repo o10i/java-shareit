@@ -54,7 +54,7 @@ class BookingServiceImplTest {
     void save() {
         when(itemService.findByIdWithCheck(anyLong()))
                 .thenReturn(item);
-        when(userService.findByIdWithCheck(anyLong()))
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
         when(repository.save(any()))
                 .thenReturn(booking);
@@ -80,7 +80,7 @@ class BookingServiceImplTest {
 
     @Test
     void approve() {
-        when(userService.findByIdWithCheck(anyLong()))
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
         when(repository.findById(anyLong()))
                 .thenReturn(Optional.of(booking));
@@ -97,7 +97,7 @@ class BookingServiceImplTest {
 
     @Test
     void findById() {
-        when(userService.findByIdWithCheck(anyLong()))
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
         when(repository.findById(anyLong()))
                 .thenReturn(Optional.of(booking));
@@ -116,7 +116,7 @@ class BookingServiceImplTest {
 
     @Test
     void findAllByBookerId() {
-        when(userService.findByIdWithCheck(anyLong()))
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
 
         List<Booking> bookings = List.of(booking);
@@ -142,7 +142,7 @@ class BookingServiceImplTest {
 
     @Test
     void findAllByOwnerId() {
-        when(userService.findByIdWithCheck(anyLong()))
+        when(userService.getByIdWithCheck(anyLong()))
                 .thenReturn(user);
 
         List<Booking> bookings = List.of(booking);
