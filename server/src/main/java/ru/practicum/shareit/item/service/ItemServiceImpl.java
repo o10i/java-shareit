@@ -43,9 +43,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public ItemRequestDto save(Long userId, ItemRequestDto itemRequestDto) {
-        userService.getByIdWithCheck(userId);
-        return toItemRequestDto(repository.save(toItem(itemRequestDto, userId)));
+    public ItemRequestDto save(Long ownerId, ItemRequestDto itemRequestDto) {
+        userService.getByIdWithCheck(ownerId);
+        return toItemRequestDto(repository.save(toItem(itemRequestDto, ownerId)));
     }
 
     @Transactional

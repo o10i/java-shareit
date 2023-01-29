@@ -18,9 +18,9 @@ public class ItemController {
     private final ItemService service;
 
     @PostMapping()
-    public ItemRequestDto save(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ItemRequestDto save(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                                @RequestBody ItemRequestDto itemRequestDto) {
-        return service.save(userId, itemRequestDto);
+        return service.save(ownerId, itemRequestDto);
     }
 
     @GetMapping("/{itemId}")

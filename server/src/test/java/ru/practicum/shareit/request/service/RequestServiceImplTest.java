@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,38 +32,42 @@ class RequestServiceImplTest {
     private RequestRepository repository;
     @Mock
     private ItemRepository itemRepository;
+    private User requestor;
+    private Request request;
+    private RequestDto requestDto;
+
+    @BeforeEach
+    void setUp() {
+        requestor = new User(1L, "name", "email@email.ru");
+        request = new Request(1L, "description", requestor, null, null);
+        requestDto = new RequestDto(1L, "description", null, List.of());
+    }
 
     @Test
     void save_thenSavedRequestDtoReturned() {
-        Request request = getRequest();
-        when(userService.getByIdWithCheck(anyLong())).thenReturn(getUser());
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(requestor);
         when(repository.save(any())).thenReturn(request);
 
         RequestDto actualRequestDto = service.save(request.getId(), new RequestRequestDto("description"));
 
-        assertEquals(getRequestDto(), actualRequestDto);
+        assertEquals(requestDto, actualRequestDto);
     }
 
     @Test
     void getById_thenFoundRequestDtoReturned() {
-        User requestor = getUser();
-        Request request = getRequest();
         when(userService.getByIdWithCheck(any())).thenReturn(requestor);
         when(repository.findById(any())).thenReturn(Optional.of(request));
 
         RequestDto actualRequestDto = service.getById(requestor.getId(), request.getId());
 
-        assertEquals(getRequestDto(), actualRequestDto);
+        assertEquals(requestDto, actualRequestDto);
     }
 
     @Test
     void getAll_thenFoundRequestDtoListReturned() {
-        when(repository.findAll()).thenReturn(List.of(getRequest()));
+        when(repository.findAll()).thenReturn(List.of(request));
 
-        User requestor = getUser();
-        requestor.setId(2L);
-        RequestDto requestDto = getRequestDto();
-        List<RequestDto> requestDtos = service.getAll(requestor.getId(), 0, 10);
+        List<RequestDto> requestDtos = service.getAll(2L, 0, 10);
 
         assertEquals(1, requestDtos.size());
         assertEquals(requestDto, requestDtos.get(0));
@@ -70,23 +75,11 @@ class RequestServiceImplTest {
 
     @Test
     void getAllByRequestorId_thenFoundRequestDtoListReturned() {
-        when(repository.findAllByRequestorOrderByCreatedDesc(any())).thenReturn(List.of(getRequest()));
+        when(repository.findAllByRequestorOrderByCreatedDesc(any())).thenReturn(List.of(request));
 
-        List<RequestDto> requestDtos = service.getAllByRequestorId(getUser().getId());
+        List<RequestDto> requestDtos = service.getAllByRequestorId(requestor.getId());
 
         assertEquals(1, requestDtos.size());
-        assertEquals(getRequestDto(), requestDtos.get(0));
-    }
-
-    private User getUser() {
-        return new User(1L, "name", "email@email.ru");
-    }
-
-    private Request getRequest() {
-        return new Request(1L, "description", getUser(), null, null);
-    }
-
-    private RequestDto getRequestDto() {
-        return new RequestDto(1L, "description", null, List.of());
+        assertEquals(requestDto, requestDtos.get(0));
     }
 }

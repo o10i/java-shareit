@@ -8,7 +8,7 @@ import ru.practicum.shareit.item.model.Comment;
 import java.util.List;
 
 public interface ItemService {
-    ItemRequestDto save(Long userId, ItemRequestDto itemRequestDto);
+    ItemRequestDto save(Long ownerId, ItemRequestDto itemRequestDto);
 
     ItemRequestDto update(Long userId, Long itemId, ItemRequestDto itemRequestDto);
 

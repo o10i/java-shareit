@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,72 +41,88 @@ class ItemServiceImplTest {
     private UserServiceImpl userService;
     @Mock
     private CommentRepository commentRepository;
+    private User owner;
+    private User booker;
+    private ItemRequestDto itemRequestDto;
+    private Item item;
+    private ItemDto itemDto;
+    private Comment comment;
+    private CommentDto commentDto;
+    private Booking booking;
+
+    @BeforeEach
+    void setUp() {
+        owner = new User(1L, "ownerName", "owner@email.ru");
+        booker = new User(2L, "bookerName", "booker@email.ru");
+        itemRequestDto = new ItemRequestDto(1L, "itemName", "description", true, null);
+        item = new Item(1L, itemRequestDto.getName(), itemRequestDto.getDescription(), itemRequestDto.getAvailable(), owner.getId(), itemRequestDto.getRequestId(), null, null, null);
+        itemDto = new ItemDto(1L, item.getName(), item.getDescription(), item.getAvailable(), new ItemDto.BookingDto(1L, booker.getId()), new ItemDto.BookingDto(1L, booker.getId()), Set.of());
+        commentDto = new CommentDto(1L, "comment", owner.getName(), null);
+        comment = new Comment(1L, commentDto.getText(), item, owner, commentDto.getCreated());
+        booking = new Booking(1L, null, null, null, booker, null);
+    }
 
     @Test
     void save_thenSavedItemDtoReturned() {
-        User user = getUser();
-        Item item = getItem();
-        when(userService.getByIdWithCheck(anyLong())).thenReturn(user);
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(owner);
         when(repository.save(any())).thenReturn(item);
 
-        ItemRequestDto itemRequestDto = getItemRequestDto();
-        ItemRequestDto actualItemRequestDto = service.save(user.getId(), itemRequestDto);
+        ItemRequestDto actualItemRequestDto = service.save(booker.getId(), itemRequestDto);
 
         assertEquals(itemRequestDto, actualItemRequestDto);
     }
 
-    @Test
+ @Test
     void getById_thenFoundItemDtoReturned() {
-        User user = getUser();
-        Item item = getItem();
-        Booking booking = getBooking();
-        when(userService.getByIdWithCheck(anyLong())).thenReturn(user);
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(owner);
         when(repository.findById(anyLong())).thenReturn(Optional.of(item));
         when(bookingRepository.findFirstByItemIdAndEndBeforeAndStatusEqualsOrderByEndDesc(anyLong(), any(), any())).thenReturn(booking);
         when(bookingRepository.findFirstByItemIdAndStartAfterAndStatusEqualsOrderByStart(anyLong(), any(), any())).thenReturn(booking);
 
-        ItemDto actualItemDto = service.getById(user.getId(), item.getId());
+        ItemDto actualItemDto = service.getById(owner.getId(), item.getId());
 
-        assertEquals(getItemDtoForOne(), actualItemDto);
+        assertEquals(itemDto, actualItemDto);
     }
 
     @Test
     void getAllByOwnerId_thenFoundItemDtoListReturned() {
-        when(userService.getByIdWithCheck(anyLong())).thenReturn(getUser());
-        when(repository.findAllByOwnerIdOrderById(anyLong())).thenReturn(List.of(getItem()));
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(owner);
+        when(repository.findAllByOwnerIdOrderById(anyLong())).thenReturn(List.of(item));
+        itemDto.setLastBooking(null);
+        itemDto.setNextBooking(null);
+        itemDto.setComments(null);
 
-        List<ItemDto> actualItemDtoList = service.getAllByOwnerId(1L, 0, 10);
+        List<ItemDto> actualItemDtoList = service.getAllByOwnerId(owner.getId(), 0, 10);
 
         assertEquals(1, actualItemDtoList.size());
-        assertEquals(getItemDtoForAll(), actualItemDtoList.get(0));
+        assertEquals(itemDto, actualItemDtoList.get(0));
     }
 
     @Test
     void update_thenUpdatedItemDtoReturned() {
-        when(userService.getByIdWithCheck(anyLong())).thenReturn(getUser());
-        when(repository.findById(anyLong())).thenReturn(Optional.of(getItem()));
-
-        ItemRequestDto itemRequestDto = getItemRequestDto();
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(owner);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(item));
         itemRequestDto.setName("nameUpdated");
-        ItemRequestDto actualItemRequestDto = service.update(1L, 1L, itemRequestDto);
+
+        ItemRequestDto actualItemRequestDto = service.update(owner.getId(), item.getId(), itemRequestDto);
 
         assertEquals(itemRequestDto, actualItemRequestDto);
     }
 
     @Test
     void update_thenForbiddenExceptionThrown() {
-        when(repository.findById(anyLong())).thenReturn(Optional.of(getItem()));
-        assertThrows(ForbiddenException.class, () -> service.update(2L, 2L, getItemRequestDto()));
+        when(repository.findById(anyLong())).thenReturn(Optional.of(item));
+        assertThrows(ForbiddenException.class, () -> service.update(2L, 2L, itemRequestDto));
     }
 
     @Test
     void search_thenFoundItemRequestDtoListReturned() {
-        when(repository.search(anyString())).thenReturn(List.of(getItem()));
+        when(repository.search(anyString())).thenReturn(List.of(item));
 
         List<ItemRequestDto> actualItemRequestDtoList = service.search("item", 0, 10);
 
         assertEquals(1, actualItemRequestDtoList.size());
-        assertEquals(getItemRequestDto(), actualItemRequestDtoList.get(0));
+        assertEquals(itemRequestDto, actualItemRequestDtoList.get(0));
     }
 
     @Test
@@ -115,61 +132,22 @@ class ItemServiceImplTest {
 
     @Test
     void saveComment_thenSavedCommentDtoReturned() {
-        User user = getUser();
-        Item item = getItem();
-        Comment comment = getComment();
-        when(userService.getByIdWithCheck(anyLong())).thenReturn(user);
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(owner);
         when(repository.findById(anyLong())).thenReturn(Optional.of(item));
         when(bookingRepository.findAllByBookerIdAndItemIdAndEndBeforeAndStatusEquals(any(), any(), any(), any())).thenReturn(List.of(new Booking()));
         when(commentRepository.save(any())).thenReturn(comment);
 
-        CommentDto actualCommentDto = service.saveComment(user.getId(), item.getId(), comment);
+        CommentDto actualCommentDto = service.saveComment(owner.getId(), item.getId(), comment);
 
-        assertEquals(getCommentDto(), actualCommentDto);
+        assertEquals(commentDto, actualCommentDto);
     }
 
     @Test
     void saveComment_thenBadRequestExceptionThrown() {
-        User user = getUser();
-        Item item = getItem();
-        Comment comment = getComment();
-        when(userService.getByIdWithCheck(anyLong())).thenReturn(user);
+        when(userService.getByIdWithCheck(anyLong())).thenReturn(owner);
         when(repository.findById(anyLong())).thenReturn(Optional.of(item));
         when(bookingRepository.findAllByBookerIdAndItemIdAndEndBeforeAndStatusEquals(any(), any(), any(), any())).thenReturn(List.of());
 
-        assertThrows(BadRequestException.class, () -> service.saveComment(user.getId(), item.getId(), comment));
-    }
-
-
-    private User getUser() {
-        return new User(1L, "userName", "email@email.ru");
-    }
-
-    private Item getItem() {
-        return new Item(1L, "itemName", "description", true, 1L, null, null, null, null);
-    }
-
-    private ItemDto getItemDtoForOne() {
-        return new ItemDto(1L, "itemName", "description", true, new ItemDto.BookingDto(1L, getUser().getId()), new ItemDto.BookingDto(1L, getUser().getId()), Set.of());
-    }
-
-    private ItemDto getItemDtoForAll() {
-        return new ItemDto(1L, "itemName", "description", true, null, null, null);
-    }
-
-    private ItemRequestDto getItemRequestDto() {
-        return new ItemRequestDto(1L, "itemName", "description", true, null);
-    }
-
-    private Comment getComment() {
-        return new Comment(1L, "comment", getItem(), getUser(), null);
-    }
-
-    private CommentDto getCommentDto() {
-        return new CommentDto(1L, "comment", getUser().getName(), null);
-    }
-
-    private Booking getBooking() {
-        return new Booking(1L, null, null, null, getUser(), null);
+        assertThrows(BadRequestException.class, () -> service.saveComment(owner.getId(), item.getId(), comment));
     }
 }
